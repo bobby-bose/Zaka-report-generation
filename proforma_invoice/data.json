@@ -1,52 +1,36 @@
 {
-  "bill_to_address": "ABC Trading Company\n123 Business Street\nRotterdam, Netherlands",
-  "date": "2025-12-07",
-  "invoice_no": "PI-2025-001",
-  "po_wo_number": "PO-2025-0001",
-  "your_reference_no": "999",
-  "our_reference_no": "REF-ZAKA-001",
-  "currency": "INR",
+  "bill_to_address": "rr",
+  "date": "2025-12-10",
+  "invoice_no": "r",
+  "po_wo_number": "r",
+  "your_reference_no": "r",
+  "our_reference_no": "r",
+  "currency": "USD",
   "items": [
     {
       "lineNo": 1,
-      "partNumber": "6",
-      "description": "6",
-      "quantity": "6",
-      "unitRate": "66",
-      "total": "396.00"
+      "partNumber": "r",
+      "description": "r",
+      "quantity": "4",
+      "unitRate": "4",
+      "total": "16.00"
     },
     {
       "lineNo": 2,
-      "partNumber": "6",
-      "description": "6",
-      "quantity": "6",
-      "unitRate": "66",
-      "total": "396.00"
-    },
-    {
-      "lineNo": 3,
-      "partNumber": "8",
-      "description": "8",
-      "quantity": "8",
-      "unitRate": "88",
-      "total": "704.00"
-    },
-    {
-      "lineNo": 4,
-      "partNumber": "88",
-      "description": "8",
-      "quantity": "888",
-      "unitRate": "888",
-      "total": "788544.00"
+      "partNumber": "r",
+      "description": "r",
+      "quantity": "4",
+      "unitRate": "4",
+      "total": "16.00"
     }
   ],
-  "total_amount": "790040.00",
-  "discount_percent": "5",
-  "discount_amount": "39502.00",
+  "total_amount": "32.00",
+  "discount_percent": "3",
+  "discount_amount": "0.96",
   "received_details": "Received Amount",
-  "received_amount": "0.00",
-  "balance_amount": "750538.00",
-  "country_of_origin": "United Arab Emirates",
+  "received_amount": "20",
+  "balance_amount": "31.04",
+  "country_of_origin": "India",
   "port_of_embarkation": "Jebel Ali Port",
   "port_of_discharge": "Rotterdam Port",
   "date_created": "2025-12-11"
