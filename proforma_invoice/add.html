@@ -211,16 +211,26 @@ Rotterdam, Netherlands</textarea>
                         <td><input type="text" class="form-input-table part-number" value=""></td>
                         <td><input type="text" class="form-input-table description" value=""></td>
                         <td><input type="number" class="form-input-table quantity text-end" value="0"></td>
-                        <td><input type="number" class="form-input-table unit-rate text-end" value="0.00"></td>
-                        <td class="total text-end pe-3">0.00</td>
+                        <td>
+                            <div class="d-flex justify-content-end align-items-center">
+                                <input type="number" class="form-input-table unit-rate text-end" value="0.00">
+                                <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                            </div>
+                        </td>
+                        <td class="total text-end pe-3"><span class="amount-num">0.00</span><span class="currency-display ms-2" style="min-width: 15px;"></span></td>
                     </tr>
                     <tr class="line-item-row" data-line="2">
                         <td class="line-no">2</td>
                         <td><input type="text" class="form-input-table part-number" value=""></td>
                         <td><input type="text" class="form-input-table description" value=""></td>
                         <td><input type="number" class="form-input-table quantity text-end" value="0"></td>
-                        <td><input type="number" class="form-input-table unit-rate text-end" value="0.00"></td>
-                        <td class="total text-end pe-3">0.00</td>
+                        <td>
+                            <div class="d-flex justify-content-end align-items-center">
+                                <input type="number" class="form-input-table unit-rate text-end" value="0.00">
+                                <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                            </div>
+                        </td>
+                        <td class="total text-end pe-3"><span class="amount-num">0.00</span><span class="currency-display ms-2" style="min-width: 15px;"></span></td>
                     </tr>
                 </tbody>
             </table>
@@ -235,11 +245,18 @@ Rotterdam, Netherlands</textarea>
         <div class="row">
             <div class="col-md-4">
                 <label for="totalAmount" class="form-label">Total Amount</label>
-                <input type="text" class="form-control" id="totalAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="totalAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
-                <label for="currency" class="form-label">Currency</label>
-                <input type="text" class="form-control" id="currency" value="USD">
+                <label for="currencySelect" class="form-label">Currency</label>
+                <select class="form-select" id="currencySelect">
+                    <option value="USD" selected>USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="EUR">EUR (€)</option>
+                </select>
             </div>
             <div class="col-md-4">
                 <label for="discountPercentage" class="form-label">Discount (%)</label>
@@ -250,22 +267,34 @@ Rotterdam, Netherlands</textarea>
         <div class="row">
             <div class="col-md-4">
                 <label for="discountAmount" class="form-label">Discount Amount</label>
-                <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="receivableAmount" class="form-label">Receivable Amount</label>
-                <input type="text" class="form-control" id="receivableAmount" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="receivableAmount" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="receivedAmount" class="form-label">Received Amount</label>
-                <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., $5,000.00">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., 5000.00">
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
         </div>
 
         <div class="row mb-0">
             <div class="col-md-4">
                 <label for="balanceAmount" class="form-label">Balance Amount</label>
-                <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="countryOfOrigin" class="form-label">Country of Origin</label>
@@ -304,6 +333,19 @@ Rotterdam, Netherlands</textarea>
         const discountAmountInput = document.getElementById('discountAmount');
         const receivableAmountInput = document.getElementById('receivableAmount');
         const balanceAmountInput = document.getElementById('balanceAmount');
+        const currencySelect = document.getElementById('currencySelect');
+
+        const currencySymbolMap = {
+            USD: '$',
+            INR: '₹',
+            EUR: '€'
+        };
+
+        function updateCurrencySymbols() {
+            const symbol = currencySymbolMap[currencySelect.value] || '';
+            document.querySelectorAll('.currency-display').forEach(el => el.textContent = symbol);
+        }
+        currencySelect.addEventListener('change', updateCurrencySymbols);
 
         // Function to create a new line item row HTML string
         const createRow = (lineNumber) => {
@@ -313,8 +355,13 @@ Rotterdam, Netherlands</textarea>
                     <td><input type="text" class="form-input-table part-number" value=""></td>
                     <td><input type="text" class="form-input-table description" value=""></td>
                     <td><input type="number" class="form-input-table quantity text-end" value="0" min="0"></td>
-                    <td><input type="number" class="form-input-table unit-rate text-end" value="0.00" min="0" step="0.01"></td>
-                    <td class="total text-end pe-3">0.00</td>
+                    <td>
+                        <div class="d-flex justify-content-end align-items-center">
+                            <input type="number" class="form-input-table unit-rate text-end" value="0.00" min="0" step="0.01">
+                            <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                        </div>
+                    </td>
+                    <td class="total text-end pe-3"><span class="amount-num">0.00</span><span class="currency-display ms-2" style="min-width: 15px;"></span></td>
                 </tr>
             `;
         };
@@ -330,7 +377,12 @@ Rotterdam, Netherlands</textarea>
             
             const lineTotal = quantity * rate;
             
-            totalCell.textContent = lineTotal.toFixed(2);
+            const amountSpan = totalCell.querySelector('.amount-num');
+            if (amountSpan) {
+                amountSpan.textContent = lineTotal.toFixed(2);
+            } else {
+                totalCell.textContent = lineTotal.toFixed(2);
+            }
             return lineTotal;
         };
 
@@ -386,6 +438,9 @@ Rotterdam, Netherlands</textarea>
                 input.addEventListener('input', handleInputChange);
             });
 
+            // Ensure currency symbol is applied to newly added row
+            updateCurrencySymbols();
+
             updateSummary(); // Re-calculate after adding a row
         });
 
@@ -406,7 +461,7 @@ Rotterdam, Netherlands</textarea>
                 billToAddress: document.getElementById('billToAddress').value,
                 lineItems: [],
                 totalAmount: document.getElementById('totalAmount').value,
-                currency: document.getElementById('currency').value,
+                currency: document.getElementById('currencySelect').value,
                 discountPercentage: document.getElementById('discountPercentage').value,
                 discountAmount: document.getElementById('discountAmount').value,
                 receivableAmount: document.getElementById('receivableAmount').value,
@@ -426,7 +481,7 @@ Rotterdam, Netherlands</textarea>
                     description: row.querySelector('.description').value,
                     quantity: row.querySelector('.quantity').value,
                     unitRate: row.querySelector('.unit-rate').value,
-                    total: row.querySelector('.total').textContent
+                    total: (row.querySelector('.total .amount-num') ? row.querySelector('.total .amount-num').textContent : row.querySelector('.total').textContent)
                 };
                 formData.lineItems.push(lineItem);
             });
@@ -457,6 +512,8 @@ Rotterdam, Netherlands</textarea>
 
         // Initial calculation on page load
         updateSummary(); 
+        // Apply currency symbols to all display areas
+        updateCurrencySymbols();
     });
 </script>
 

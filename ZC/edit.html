@@ -102,7 +102,14 @@
             <fieldset class="mb-4 p-3 border rounded">
                 <legend class="float-none w-auto px-1 fs-6">Goods and Contact Information</legend>
                 <div class="row">
-                    <div class="col-md-4 mb-3"><label for="currency" class="form-label">Currency</label><input type="text" class="form-control" id="currency" placeholder="Currency (e.g., INR, USD, EUR)"></div>
+                    <div class="col-md-4 mb-3">
+                        <label for="currencySelect" class="form-label">Currency</label>
+                        <select class="form-select" id="currencySelect">
+                            <option value="USD">USD ($)</option>
+                            <option value="INR">INR (₹)</option>
+                            <option value="EUR" selected>EUR (€)</option>
+                        </select>
+                    </div>
                     <div class="col-md-4 mb-3"><label for="vesselFlight" class="form-label">Vessel / Flight</label><input type="text" class="form-control" id="vesselFlight" placeholder="Vessel / Flight"></div>
                     <div class="col-md-4 mb-3"><label for="countryOfOrigin" class="form-label">Country of Origin (Goods)</label><input type="text" class="form-control" id="countryOfOrigin" placeholder="Country of Origin (Goods)"></div>
                 </div>
@@ -159,15 +166,24 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalExportValue" class="form-label">Total Export Value</label>
-                    <input type="text" class="form-control" id="totalExportValue" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalExportValue" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalGstValue" class="form-label">Total GST Value (Sum of IGST)</label>
-                    <input type="text" class="form-control" id="totalGstValue" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalGstValue" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalInvoiceValue" class="form-label">Total Invoice Value</label>
-                    <input type="text" class="form-control" id="totalInvoiceValue" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalInvoiceValue" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="numberOfBoxes" class="form-label">Number of Boxes</label>
@@ -189,6 +205,20 @@
 
         // Get record ID from URL
         const recordId = new URLSearchParams(window.location.search).get('id');
+
+        // Currency symbol mapping
+        const currencySymbolMap = {
+            USD: '$',
+            INR: '₹',
+            EUR: '€'
+        };
+
+        // Function to update currency symbols throughout the form
+        function updateCurrencySymbols() {
+            const currencySelect = document.getElementById('currencySelect');
+            const symbol = currencySymbolMap[currencySelect.value] || '';
+            document.querySelectorAll('.currency-display').forEach(el => el.textContent = symbol);
+        }
 
         // Function to generate the HTML for a new item row
         function createNewRow(initialPackageStart, initialPackageEnd, rowData = {}) {
@@ -214,10 +244,16 @@
                         <input type="number" class="form-control form-control-sm quantity" value="${rowData.quantity || 0}" min="0">
                     </td>
                     <td>
-                        <input type="number" class="form-control form-control-sm rate" value="${rowData.rate || '0.00'}" min="0" step="0.01">
+                        <div class="d-flex align-items-center justify-content-end">
+                            <input type="number" class="form-control form-control-sm rate" value="${rowData.rate || '0.00'}" min="0" step="0.01" style="flex: 1;">
+                            <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                        </div>
                     </td>
                     <td>
-                        <input type="text" class="form-control form-control-sm amount" value="${rowData.amount || '0.00'}" disabled>
+                        <div class="d-flex align-items-center justify-content-end">
+                            <input type="text" class="form-control form-control-sm amount" value="${rowData.amount || '0.00'}" disabled style="flex: 1;">
+                            <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                        </div>
                     </td>
                     <td>
                         <input type="number" class="form-control form-control-sm taxable-value" value="${rowData.taxableValue || '0.00'}" min="0" step="0.01">
@@ -226,7 +262,10 @@
                         <input type="number" class="form-control form-control-sm igst-percent" value="${rowData.igstPercent || 0}" min="0" max="100" step="0.01">
                     </td>
                     <td>
-                        <input type="text" class="form-control form-control-sm igst-amount" value="${rowData.igstAmount || '0.00'}" disabled>
+                        <div class="d-flex align-items-center justify-content-end">
+                            <input type="text" class="form-control form-control-sm igst-amount" value="${rowData.igstAmount || '0.00'}" disabled style="flex: 1;">
+                            <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                        </div>
                     </td>
                     <td class="text-center">
                         <button type="button" class="btn btn-danger btn-sm delete-row-btn" style="background-color: #dc3545; border-color: #dc3545; color: white; font-weight: bold;">🗑️</button>
@@ -355,7 +394,7 @@
                     document.getElementById('placeOfReceipt').value = data.placeOfReceipt || '';
                     document.getElementById('portOfDestination').value = data.portOfDestination || '';
                     document.getElementById('destination').value = data.destination || '';
-                    document.getElementById('currency').value = data.currency || '';
+                    document.getElementById('currencySelect').value = data.currency || 'EUR';
                     document.getElementById('vesselFlight').value = data.vesselFlight || '';
                     document.getElementById('countryOfOrigin').value = data.countryOfOrigin || '';
                     document.getElementById('adCode').value = data.adCode || '';
@@ -385,6 +424,7 @@
                     }
                     
                     updateTotals();
+                    updateCurrencySymbols();
                     
                     document.getElementById('amountInWords').value = data.amountInWords || '';
                     document.getElementById('totalExportValue').value = data.totalExportValue || '0.00';
@@ -434,7 +474,7 @@
                 placeOfReceipt: document.getElementById('placeOfReceipt').value,
                 portOfDestination: document.getElementById('portOfDestination').value,
                 destination: document.getElementById('destination').value,
-                currency: document.getElementById('currency').value,
+                currency: document.getElementById('currencySelect').value,
                 vesselFlight: document.getElementById('vesselFlight').value,
                 countryOfOrigin: document.getElementById('countryOfOrigin').value,
                 adCode: document.getElementById('adCode').value,
@@ -490,6 +530,12 @@
             const removeRowBtn = document.getElementById('removeRowBtn');
 
             loadRecordData();
+            
+            // Currency change listener
+            const currencySelect = document.getElementById('currencySelect');
+            if (currencySelect) {
+                currencySelect.addEventListener('change', updateCurrencySymbols);
+            }
             
             // Initialize auto-expand textareas
             document.querySelectorAll('.auto-expand').forEach(textarea => {

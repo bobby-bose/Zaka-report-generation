@@ -3,35 +3,51 @@
   "date": "2025-12-07",
   "invoice_no": "PI-2025-001",
   "po_wo_number": "PO-2025-0001",
-  "your_reference_no": "uuuuu",
+  "your_reference_no": "999",
   "our_reference_no": "REF-ZAKA-001",
-  "currency": "USD",
+  "currency": "INR",
   "items": [
     {
       "lineNo": 1,
-      "partNumber": "",
-      "description": "",
-      "quantity": "0",
-      "unitRate": "0.00",
-      "total": "0.00"
+      "partNumber": "6",
+      "description": "6",
+      "quantity": "6",
+      "unitRate": "66",
+      "total": "396.00"
     },
     {
       "lineNo": 2,
-      "partNumber": "",
-      "description": "",
-      "quantity": "0",
-      "unitRate": "0.00",
-      "total": "0.00"
+      "partNumber": "6",
+      "description": "6",
+      "quantity": "6",
+      "unitRate": "66",
+      "total": "396.00"
+    },
+    {
+      "lineNo": 3,
+      "partNumber": "8",
+      "description": "8",
+      "quantity": "8",
+      "unitRate": "88",
+      "total": "704.00"
+    },
+    {
+      "lineNo": 4,
+      "partNumber": "88",
+      "description": "8",
+      "quantity": "888",
+      "unitRate": "888",
+      "total": "788544.00"
     }
   ],
-  "total_amount": "0.00",
+  "total_amount": "790040.00",
   "discount_percent": "5",
-  "discount_amount": "0.00",
+  "discount_amount": "39502.00",
   "received_details": "Received Amount",
   "received_amount": "0.00",
-  "balance_amount": "0.00",
+  "balance_amount": "750538.00",
   "country_of_origin": "United Arab Emirates",
   "port_of_embarkation": "Jebel Ali Port",
   "port_of_discharge": "Rotterdam Port",
-  "date_created": "2025-12-10"
+  "date_created": "2025-12-11"
 }

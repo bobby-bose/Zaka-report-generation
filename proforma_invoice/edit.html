@@ -227,8 +227,13 @@
                         <td><input type="text" class="form-input-table part-number" value=""></td>
                         <td><input type="text" class="form-input-table description" value=""></td>
                         <td><input type="number" class="form-input-table quantity text-end" value="0"></td>
-                        <td><input type="number" class="form-input-table unit-rate text-end" value="0.00"></td>
-                        <td class="total text-end pe-3">0.00</td>
+                        <td>
+                            <div class="d-flex justify-content-end align-items-center">
+                                <input type="number" class="form-input-table unit-rate text-end" value="0.00">
+                                <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                            </div>
+                        </td>
+                        <td class="total text-end pe-3"><span class="amount-num">0.00</span><span class="currency-display ms-2" style="min-width: 15px;"></span></td>
                         <td class="text-center"><button type="button" class="delete-row-btn" data-line="1">Delete</button></td>
                     </tr>
                 </tbody>
@@ -244,11 +249,18 @@
         <div class="row">
             <div class="col-md-4">
                 <label for="totalAmount" class="form-label">Total Amount</label>
-                <input type="text" class="form-control" id="totalAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="totalAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
-                <label for="currency" class="form-label">Currency</label>
-                <input type="text" class="form-control" id="currency">
+                <label for="currencySelect" class="form-label">Currency</label>
+                <select class="form-select" id="currencySelect">
+                    <option value="USD" selected>USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="EUR">EUR (€)</option>
+                </select>
             </div>
             <div class="col-md-4">
                 <label for="discountPercentage" class="form-label">Discount (%)</label>
@@ -259,22 +271,34 @@
         <div class="row">
             <div class="col-md-4">
                 <label for="discountAmount" class="form-label">Discount Amount</label>
-                <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="receivableAmount" class="form-label">Receivable Amount</label>
-                <input type="text" class="form-control" id="receivableAmount" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="receivableAmount" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="receivedAmount" class="form-label">Received Amount</label>
-                <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., $5,000.00">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., 5000.00">
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
         </div>
 
         <div class="row mb-0">
             <div class="col-md-4">
                 <label for="balanceAmount" class="form-label">Balance Amount</label>
-                <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
+                    <span class="input-group-text currency-display"></span>
+                </div>
             </div>
             <div class="col-md-4">
                 <label for="countryOfOrigin" class="form-label">Country of Origin</label>
@@ -306,8 +330,25 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // Currency management
+    const currencySymbolMap = {
+        USD: '$',
+        INR: '₹',
+        EUR: '€'
+    };
+    
+    function updateCurrencySymbols() {
+        const currencySelect = document.getElementById('currencySelect');
+        const symbol = currencySymbolMap[currencySelect.value] || '';
+        document.querySelectorAll('.currency-display').forEach(el => el.textContent = symbol);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const recordId = new URLSearchParams(window.location.search).get('id');
+        const currencySelect = document.getElementById('currencySelect');
+        
+        // Setup currency change listener
+        currencySelect.addEventListener('change', updateCurrencySymbols);
         
         // Load record data from database if editing
         if (recordId) {
@@ -322,8 +363,11 @@
                     document.getElementById('yourReferenceNo').value = data.yourReferenceNo || '';
                     document.getElementById('supplierAddress').value = data.supplierAddress || '';
                     document.getElementById('billToAddress').value = data.billToAddress || '';
-                    document.getElementById('currency').value = data.currency || '';
+                    document.getElementById('currencySelect').value = data.currency || 'USD';
                     document.getElementById('discountPercentage').value = data.discountPercentage || '0';
+                    
+                    // Update currency symbols
+                    updateCurrencySymbols();
                     document.getElementById('receivedAmount').value = data.receivedAmount || '';
                     document.getElementById('countryOfOrigin').value = data.countryOfOrigin || '';
                     document.getElementById('portOfEmbarkation').value = data.portOfEmbarkation || '';
@@ -359,6 +403,7 @@
 
                     // Update summary with loaded values
                     updateSummary();
+                    updateCurrencySymbols();
                 })
                 .catch(error => {
                     console.log('Could not load record:', error);
@@ -516,7 +561,7 @@
                 billToAddress: document.getElementById('billToAddress').value,
                 lineItems: [],
                 totalAmount: document.getElementById('totalAmount').value,
-                currency: document.getElementById('currency').value,
+                currency: document.getElementById('currencySelect').value,
                 discountPercentage: document.getElementById('discountPercentage').value,
                 discountAmount: document.getElementById('discountAmount').value,
                 receivableAmount: document.getElementById('receivableAmount').value,

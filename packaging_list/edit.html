@@ -77,6 +77,17 @@
     </div>
 
     <form id="packingForm">
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Currency</label>
+          <select class="form-select" id="currencySelect">
+            <option value="USD" selected>USD ($)</option>
+            <option value="INR">INR (₹)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+          <input type="hidden" name="currency" id="currencyHidden" value="USD">
+        </div>
+      </div>
       <!-- Addresses -->
       <div class="card-section">
         <div class="row g-3">
@@ -539,6 +550,15 @@
 
     // Load items on page load
     loadRecordData();
+    
+    // sync currency selection to hidden input
+    const currencySelectElem = document.getElementById('currencySelect');
+    if (currencySelectElem) {
+      const currencyHidden = document.getElementById('currencyHidden');
+      currencySelectElem.addEventListener('change', (e) => {
+        if (currencyHidden) currencyHidden.value = e.target.value;
+      });
+    }
   </script>
 </body>
 </html>

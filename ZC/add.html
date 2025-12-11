@@ -101,7 +101,14 @@
             <fieldset class="mb-4 p-3 border rounded">
                 <legend class="float-none w-auto px-1 fs-6">Goods and Contact Information</legend>
                 <div class="row">
-                    <div class="col-md-4 mb-3"><label for="currency" class="form-label">Currency</label><input type="text" class="form-control" id="currency" placeholder="Currency (e.g., INR, USD, EUR)" value="EUR"></div>
+                    <div class="col-md-4 mb-3">
+                        <label for="currencySelect" class="form-label">Currency</label>
+                        <select class="form-select" id="currencySelect">
+                            <option value="USD">USD ($)</option>
+                            <option value="INR">INR (₹)</option>
+                            <option value="EUR" selected>EUR (€)</option>
+                        </select>
+                    </div>
                     <div class="col-md-4 mb-3"><label for="vesselFlight" class="form-label">Vessel / Flight</label><input type="text" class="form-control" id="vesselFlight" placeholder="Vessel / Flight" value="MV Global Express"></div>
                     <div class="col-md-4 mb-3"><label for="countryOfOrigin" class="form-label">Country of Origin (Goods)</label><input type="text" class="form-control" id="countryOfOrigin" placeholder="Country of Origin (Goods)" value="India"></div>
                 </div>
@@ -159,20 +166,29 @@ Germany</textarea></div>
                 <div class="col-12 mb-3">
                     <div class="input-group">
                         <span class="input-group-text">Amount in Words:</span>
-                        <input type="text" class="form-control" id="amountInWords" value="zero euro, zero cents" disabled>
+                        <input type="text" class="form-control" id="amountInWords" value="zero euro, zero cents">
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalExportValue" class="form-label">Total Export Value</label>
-                    <input type="text" class="form-control" id="totalExportValue" value="0.00" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalExportValue" value="0.00" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalGstValue" class="form-label">Total GST Value</label>
-                    <input type="text" class="form-control" id="totalGstValue" value="0.00" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalGstValue" value="0.00" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="totalInvoiceValue" class="form-label">Total Invoice Value</label>
-                    <input type="text" class="form-control" id="totalInvoiceValue" value="0.00" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="totalInvoiceValue" value="0.00" disabled>
+                        <span class="input-group-text currency-display"></span>
+                    </div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="numberOfBoxes" class="form-label">Number of Boxes</label>
@@ -191,6 +207,9 @@ Germany</textarea></div>
  <script>
     // Global variable to keep track of the number of rows created
 let rowCount = 0;
+
+// Track whether user has manually edited the Amount in Words field
+let amountInWordsManuallyEdited = false;
 
 // Function to generate the HTML for a new item row
 function createNewRow(initialPackageStart, initialPackageEnd) {
@@ -217,10 +236,16 @@ function createNewRow(initialPackageStart, initialPackageEnd) {
                 <input type="number" class="form-control form-control-sm quantity" value="0" min="0">
             </td>
             <td>
-                <input type="number" class="form-control form-control-sm rate" value="0.00" min="0" step="0.01">
+                <div class="d-flex align-items-center justify-content-end">
+                    <input type="number" class="form-control form-control-sm rate" value="0.00" min="0" step="0.01" style="flex: 1;">
+                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                </div>
             </td>
             <td>
-                <input type="text" class="form-control form-control-sm amount" value="0.00" disabled>
+                <div class="d-flex align-items-center justify-content-end">
+                    <input type="text" class="form-control form-control-sm amount" value="0.00" disabled style="flex: 1;">
+                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                </div>
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm taxable-value" value="0.00" min="0" step="0.01">
@@ -229,7 +254,10 @@ function createNewRow(initialPackageStart, initialPackageEnd) {
                 <input type="number" class="form-control form-control-sm igst-percent" value="0" min="0" max="100" step="0.01">
             </td>
             <td>
-                <input type="text" class="form-control form-control-sm igst-amount" value="0.00" disabled>
+                <div class="d-flex align-items-center justify-content-end">
+                    <input type="text" class="form-control form-control-sm igst-amount" value="0.00" disabled style="flex: 1;">
+                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
+                </div>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-danger btn-sm delete-row-btn" style="background-color: #dc3545; border-color: #dc3545; color: white; font-weight: bold;">🗑️</button>
@@ -357,7 +385,10 @@ function updateTotals() {
     }
 
     // Update Amount in Words based on Total Invoice Value
-    document.getElementById('amountInWords').value = numberToWords(totalInvoiceValue);
+    // Only auto-update if user hasn't manually edited it
+    if (!amountInWordsManuallyEdited) {
+        document.getElementById('amountInWords').value = numberToWords(totalInvoiceValue);
+    }
 }
 
 // Function to auto-expand textarea based on content
@@ -372,6 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const addRowBtn = document.getElementById('addRowBtn');
     const removeRowBtn = document.getElementById('removeRowBtn');
     const form = document.getElementById('exportInvoiceForm');
+    const amountInWordsInput = document.getElementById('amountInWords');
+
+    // Setup event listener to detect manual edits to Amount in Words
+    amountInWordsInput.addEventListener('input', () => {
+        amountInWordsManuallyEdited = true;
+    });
 
     // Initialize auto-expand textareas
     document.querySelectorAll('.auto-expand').forEach(textarea => {
@@ -381,9 +418,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Currency selector mapping and updater
+    const currencySelect = document.getElementById('currencySelect');
+    const currencySymbolMap = { USD: '$', INR: '₹', EUR: '€' };
+    function updateCurrencySymbols() {
+        const sym = (currencySelect && currencySymbolMap[currencySelect.value]) || '';
+        document.querySelectorAll('.currency-display').forEach(el => el.textContent = sym);
+    }
+    if (currencySelect) currencySelect.addEventListener('change', updateCurrencySymbols);
+
     // 1. Initial Row setup (1-10)
     container.insertAdjacentHTML('beforeend', createNewRow(1, 10));
     updateTotals();
+    updateCurrencySymbols();
 
     // 2. Add Row Listener: Starts the new row at the next sequential number
     addRowBtn.addEventListener('click', () => {
@@ -399,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // New row defaults to a 10-unit range
         container.insertAdjacentHTML('beforeend', createNewRow(nextStart, nextStart + 9));
         updateTotals();
+        updateCurrencySymbols();
         
         // No need to call updatePackageSequence here; the nextStart calculation was sufficient.
     });
@@ -513,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
             placeOfReceipt: document.getElementById('placeOfReceipt').value,
             portOfDestination: document.getElementById('portOfDestination').value,
             destination: document.getElementById('destination').value,
-            currency: document.getElementById('currency').value,
+            currency: document.getElementById('currencySelect') ? document.getElementById('currencySelect').value : '',
             vesselFlight: document.getElementById('vesselFlight').value,
             countryOfOrigin: document.getElementById('countryOfOrigin').value,
             adCode: document.getElementById('adCode').value,

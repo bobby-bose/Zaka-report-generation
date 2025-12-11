@@ -6,28 +6,28 @@
 <title>Packing List – Page 1</title>
 <style>
     /* Print settings for A4 paper */
-    @page { size: A4; margin: 15mm; }
+    @page { size: A4; margin: 5mm; }
     body {
         font-family: Arial, sans-serif;
-        font-size: 10pt; /* Adjusting font size to fit more content */
+        font-size: 15pt; /* Adjusting font size to fit more content */
         color: #000;
         background: #fff;
         margin: 0;
     }
     .container {
         width: 100%;
-        max-width: 7.5in; /* Standard printable width for A4 */
+        max-width: 12in; /* Standard printable width for A4 */
         margin: 0 auto;
     }
     .header {
         text-align: center;
         margin-bottom: 10px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 5px;
+     
+        
     }
     .header-img {
         width: 100%;
-        height: 100px; /* Reduced height for better fit */
+        height: 100%; /* Reduced height for better fit */
         object-fit: contain;
     }
     p {
@@ -42,7 +42,7 @@
     .info-table, .detail-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 5px;
+        
     }
     .info-table td, .detail-table th, .detail-table td {
         border: 1px solid #000;
@@ -54,6 +54,9 @@
         background: #f0f0f0;
         font-weight: bold;
         text-align: center;
+    }
+    .label-third {
+        padding:5%;
     }
     
     .text-center { text-align: center; }
@@ -68,54 +71,59 @@
         <p class="header">Packing List</p>
     </div>
 
-    <table class="info-table">
-        <tbody>
-            <tr>
-                <td rowspan="3" style="width: 50%;padding:0;">
-                 <table style="
-    border-collapse: collapse;
-    height: -webkit-fill-available;
-    /* border: none; */
-    width: 100%;
-">
-                    <tbody><tr>
-                      <td><span class="label">Consignee</span><br>
-                    {{ consigneeAddress | replace('\n', '<br>') | safe }}</td>
-                    </tr>
-                    <tr>
-                      <td class="text-center"> Tax Registration Number: {{ taxNumber }}</td>
-                    </tr>
-                    <tr>
-                      <td>  <span class="label">Delivery Address</span><br>
-                    {{ deliveryAddress | replace('\n', '<br>') | safe }}
-                </td>
-                    </tr>
-                  </tbody></table>
-                    
-                
-                   
-                </td>
-                
-                <td style="width: 30%;">
-                    <span class="label">Exporter:</span><br>
-                    Zaka Controls & Devices<br>
-                    IX 67/A, NH-66, Kodungallur,<br>
-                    KERALA- 680668<br>
-                    INDIA<br>
-                    GST No. 32ERGPS8045J1ZD
-                </td>
-                <td style="width: 20%; padding: 0;">
-           
-                        <p class="label">Date :{{ date }}</p>
-                         <p class="label">PO / NO:{{ po_no }}</p>
-                         <p class="label">Packing List No:{{ packing_list_no }}</p>
-           
-                </td>
-                   
-             
-            </tr>
-        </tbody>
-    </table>
+<table class="info-table" style="width:100%; border-collapse:collapse;">
+    <tr>
+
+        <!-- LEFT BLOCK -->
+        <td style="width:50%; padding:0; vertical-align:top;border:none;">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <td style="padding-bottom:10px;">
+                        <span class="label" style="font-weight:bold; text-decoration:underline;">Consignee</span><br>
+                     <span class="label" style="margin-left:3%; display:block; padding-left:15px;">"{{ consigneeAddress | replace('\n', '<br>') | safe }}<br><br>
+                          Tax Registration Number: {{ taxNumber }}</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding-top:10px;">
+                        <span class="label" style="font-weight:bold; text-decoration:underline;">Delivery Address</span><br><br>
+                        <span class="label" style="margin-left:3%; display:block; padding-left:15px;">{{ deliveryAddress | replace('\n', '<br>') | safe }}</span>
+                   <br> </td>
+                </tr>
+            </table>
+        </td>
+
+        <!-- MIDDLE BLOCK -->
+        <td style="width:25%; padding:10px; border-right:1px solid #000; vertical-align:top;border-left:none;">
+            <span class="label" style="font-weight:bold;">Exporter:</span><br><br>
+            Zaka Controls & Devices<br>
+            IX 67/A, NH-66, Kodungallur,<br>
+            KERALA- 680668<br>
+            INDIA<br><br>
+            GST No. 32ERGPS8045J1ZD
+        </td>
+
+        <!-- RIGHT BLOCK -->
+<td style="width:25%; padding:0; vertical-align:top;">
+    
+    <div style="margin-bottom:5px; border-bottom:1px solid #000; padding:3px 0;">
+        <span class="label-third">Date : {{ date }}</span>
+    </div>
+
+    <div style="margin-bottom:5px; border-bottom:1px solid #000; padding:3px 0;">
+        <span class="label-third">PO / {{ po_no }}</span>
+    </div>
+
+    <div style="height:60%; display:flex; justify-content:center; align-items:center; text-align:center;">
+        <span class="label-third">Packing List No: {{ packing_list_no }}</span>
+    </div>
+
+</td>
+
+
+    </tr>
+</table>
 
     <table class="info-table">
         <tbody>
@@ -131,24 +139,25 @@
     <table class="detail-table">
         <thead>
             <tr>
-                <th style="width: 5%;">Item No.</th>
-                <th style="width: 25%;">Material & Packing Description</th>
-                <th style="width: 5%;">Box No.</th>
-                <th style="width: 5%;">Qty</th>
-                <th style="width: 20%;">Dimension</th>
-                <th style="width: 15%;">Net Weight (Kg)</th>
-                <th style="width: 15%;">Gross Weight (Kg)</th>
+                <th style="width: 10%;">Item No.</th>
+                <th style="width: 20%;">Material & Packing Description</th>
+                <th style="width: 10%;">Box No.</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 25%;">Dimension</th>
+                <th style="width: 12.5%;">Net Weight (Kg)</th>
+                <th style="width: 12.5%;">Gross Weight (Kg)</th>
             </tr>
         </thead>
         <tbody>
             {% for item in items %}
                 {% set box_count = item.boxes | length %}
+                {% set outer_loop = loop %}
                 {% for box in item.boxes %}
                 <tr>
                     {# Item No. and Material: Use rowspan on the first box only #}
                     {% if loop.first %}
-                    <td rowspan="{{ box_count }}" class="text-center">{{ item.item_number or loop.parent.index }}</td>
-                    <td rowspan="{{ box_count }}" class="text-center" style="vertical-align: top;">{{ item.material }},{{ item.description }}</td>
+                    <td rowspan="{{ box_count }}" class="text-center" style="vertical-align: middle;">{{ item.item_number or outer_loop.index }}</td>
+                    <td rowspan="{{ box_count }}" class="text-center" style="vertical-align: middle;">{{ item.material }},{{ item.description }}</td>
                     {% endif %}
 
                     {# Box-specific details (always rendered) #}
@@ -180,7 +189,7 @@
            </div>
 
     <div style="margin-top: 20px; text-align: center; border-top: 2px solid #000; padding-top: 10px;">
-        <img src="/static/footer.jpg" alt="Company Logo" style="width: 100%; max-width: 7.5in; height: auto; object-fit: contain;">
+        <img src="/static/footer.jpg" alt="Company Logo" style="width: 100%; max-width: 12in; height: auto; object-fit: contain;">
     </div>
 
 </div>

@@ -1,85 +1,29 @@
-Change Report - analysis.txt
-Date: 2025-12-10
+    <!-- LEFT SIDE (goods description) -->
+    <!-- <td width="50%" style=" vertical-align:top; padding:0;">
+        <table style="width:100%; border-collapse:collapse;">
+            <tr class="bold">
+                <th class="left" width="15%">Shipping Mark</th>
+                <th class="left" width="20%">No & Kind of Pkgs</th>
+                <th class="left" width="65%">Description of Goods</th>
+            </tr>
+           
 
-Summary:
-I applied UI and template fixes requested in the attachment `changes.md`. Changes are implemented in the workspace under `x:\Web Screenshots`. Below is a concise log of what I changed, why, and any remaining items I did not change (with reasons).
+            {% for row in tableRows %}
+            <tr>
+                <td class="left">{{ loop.index }}</td>
+                <td class="left">
+                    {% if loop.index == (loop.length // 2) + (loop.length % 2) %}
+                        AS ADDRESS
+                    {% endif %}
+                </td>
+                <td class="left">
+                    {{ row.from }} - {{ row.to }}<br>{{ row.description }}
+                </td>
+            </tr>
+            {% endfor %}
+             <tr>
+                <td colspan="3" style="text-align: end;">TOTAL ($US)</td>
 
-Files changed (summary):
-- `packaging_list/view.html`
-  - Heading changed to: "Packaging List" (previously "Packaging List - View Records").
-  - Added a left-aligned "Back" button that navigates to `/main.html` (explicit navigation, not history.back).
-  - Moved the existing Add button to the right side of the same action bar (keeps button inside container and aligned to table width).
-  - Implemented client-side descending sorting of records (function `sortDataDesc`) before rendering. Sort attempts (in order): `updatedAt/updated_at/modifiedAt/createdAt/...`, then falls back to numeric `id`.
-  - Table rows now show a serial index column (1,2,3...) derived from the displayed order.
-
-- `proforma_invoice/view.html`
-  - Heading changed to: "Performa" (per supplied spec).
-  - Added left "Back" button to `/main.html` and moved Add button to right (same behavior as above).
-  - Implemented client-side descending sorting using `sortDataDesc` and index-based numbering for the table.
-
-- `ZC/view.html`
-  - Heading changed to: "Set C" (per supplied spec).
-  - Added left "Back" button to `/main.html` and moved Add button to right.
-  - Implemented client-side descending sorting before rendering. The template previously used index numbering; kept that but ensured sort is applied so the index reflects the displayed order.
-
-- `packaging_list/packing_start.html`
-  - Item number cell used to print `{{ item.item_number }}`. Replaced with `{{ item.item_number or loop.parent.index }}` so the template prints the provided item number when present, otherwise falls back to the outer loop index (1-based).
-  - Important note: the template uses nested loops (items -> boxes). Using `loop.parent.index` inside the inner loop ensures the outer item index prints correctly.
-
-- `proforma_invoice/start.html`
-  - For the Line No column, changed `{{ item.line_no }}` to `{{ item.line_no or loop.index }}` so missing/empty line numbers are replaced by the template loop index.
-
-- `ZC/start.html`
-  - Added an explicit S.No column header and first cell `{{ loop.index }}` inside the `tableRows` loop so each row shows an item number (1,2,3...).
-  - Adjusted the table column definitions slightly to accommodate the new S.No column.
-
-What I did NOT change (and why):
-- Backend/server code (e.g., endpoints in `main.py`) was not changed.
-  - Reason: the instructions asked for template/UI and template fixes. Changing server-side sorting or database queries would be more invasive and requires testing the running app. I implemented a client-side descending sort as a safe, non-breaking fallback. If you prefer server-side ordering (recommended for large datasets), I can change the API handlers to return ordered records.
-
-- Any `add.html` files or detailed UI redesign beyond alignment/heading cleanup.
-  - Reason: explicitly out of scope per instructions.
-
-- Automatic changes to other report templates not present in the workspace or not clearly mapped from the spec (e.g., "Performa/*start.html" mapping):
-  - I mapped the spec to the nearest files in the repo:
-    - "PackagingList/packing_start.html" -> `packaging_list/packing_start.html` (updated)
-    - "Performa/*start.html" -> `proforma_invoice/start.html` (updated)
-    - "SetC/*start.html" -> `ZC/start.html` (updated)
-  - If there are additional `*_start.html` files for other folders, tell me the paths and I'll update them similarly.
-
-Testing notes and recommendations:
-- Verify the changes by running the application and visiting:
-  - `/packaging_list/view.html`
-  - `/proforma_invoice/view.html`
-  - `/ZC/view.html`  (or the route your app uses for ZC)
-- Confirm the Back button navigates to `/main.html` (explicit link). If you prefer a different path (e.g., just `/`), I can update it.
-- Confirm API endpoints return `updatedAt` / `createdAt` fields for best sorting behavior. If the API can be changed to return records already sorted (recommended), remove the client-side sorter and rely on server ordering.
-
-Files modified (exact paths):
-- x:\Web Screenshots\packaging_list\view.html
-- x:\Web Screenshots\proforma_invoice\view.html
-- x:\Web Screenshots\ZC\view.html
-- x:\Web Screenshots\packaging_list\packing_start.html
-- x:\Web Screenshots\proforma_invoice\start.html
-- x:\Web Screenshots\ZC\start.html
-
-Next steps I can take (choose any):
-- Update the backend endpoints to return records pre-sorted (server-side), instead of client-side sorting.
-- Run the app locally and smoke-test the pages (if you want, I can run the dev server and show results).
-- Apply the same start-template loop-index fix to any other missing templates you list.
-
-If you'd like, I will now:
-- run a quick grep for other `*_start.html` templates and update them similarly, or
-- update the backend to sort server-side (I will need which endpoint to change), or
-- run the app locally and produce screenshots of the updated pages.
-
-Server-side change applied (2025-12-10):
-- I updated the list API endpoints so the server returns records already sorted. This removes reliance on client-side sorting and ensures newly created/updated records appear first.
-  - Modified endpoints in `main.py`:
-    - `/api/packaging-list`
-    - `/api/proforma-invoice`
-    - `/api/zc-exporter`
-  - Sorting used: `updated_at` (desc), then `created_at` (desc), then `id` (desc).
-  - Each endpoint now also includes an `updatedAt` timestamp in the JSON output (for debugging). UI continues to use existing fields and will receive records in correct order.
-
-End of report.
+            </tr>
+        </table>
+    </td> -->

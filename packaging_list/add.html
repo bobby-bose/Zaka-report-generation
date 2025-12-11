@@ -80,6 +80,17 @@
     </div>
 
     <form id="packingForm">
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Currency</label>
+          <select class="form-select" id="currencySelect">
+            <option value="USD" selected>USD ($)</option>
+            <option value="INR">INR (₹)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+          <input type="hidden" name="currency" id="currencyHidden" value="USD">
+        </div>
+      </div>
       <!-- Addresses -->
       <div class="card-section">
         <div class="row g-3">
@@ -269,7 +280,6 @@ Dubai, UAE</textarea>
     // Data model
     let items = [];
     let currentItemIndex = null;
-    let globalBoxNumber = 1;
 
     const itemsContainer = document.getElementById("itemsContainer");
     const boxesRows = document.getElementById("boxesRows");
@@ -293,6 +303,34 @@ Dubai, UAE</textarea>
       .getElementById("packingForm")
       .addEventListener("submit", (e) => {
         e.preventDefault();
+        
+        // Validate that all items have at least one box
+        for (let item of items) {
+          if (item.boxes.length === 0) {
+            alert('All items must have at least one box. Please add boxes to all items.');
+            return;
+          }
+        }
+        
+        // Validate box number uniqueness across all items
+        const allBoxNumbers = [];
+        for (let item of items) {
+          for (let box of item.boxes) {
+            const boxNum = Number(box.boxNo);
+            if (isNaN(boxNum) || boxNum < 1) {
+              alert('All box numbers must be valid positive numbers.');
+              return;
+            }
+            allBoxNumbers.push(boxNum);
+          }
+        }
+        
+        const uniqueBoxNumbers = new Set(allBoxNumbers);
+        if (uniqueBoxNumbers.size !== allBoxNumbers.length) {
+          alert('Box numbers must be unique across all items. Please check and fix duplicate box numbers.');
+          return;
+        }
+        
         const formData = new FormData(e.target);
         const payload = {
           consigneeAddress: formData.get("consigneeAddress"),
@@ -305,6 +343,7 @@ Dubai, UAE</textarea>
           dischargePort: formData.get("dischargePort"),
           hsCode: formData.get("hsCode"),
           taxNumber: formData.get("taxNumber"),
+          currency: document.getElementById('currencySelect').value,
           items: items,
         };
         
@@ -425,14 +464,17 @@ Dubai, UAE</textarea>
     }
 
     function addBoxRow(existingBox = null) {
-      const boxId = existingBox ? existingBox.boxNo : globalBoxNumber++;
+      const boxId = existingBox ? existingBox.boxNo : '';
       const wrapper = document.createElement("div");
       wrapper.className = "box-row";
 
       wrapper.innerHTML = `
         <div class="row g-2 align-items-center">
-          <div class="col-1 fw-semibold">
-            Box ${boxId}
+          <div class="col-auto d-flex align-items-center gap-1">
+            <span class="fw-semibold">Box Number </span>
+            <span class="fw-semibold">-</span>
+            <input type="number" class="form-control form-control-sm border-success box-number"
+                   placeholder="#" value="${boxId}" min="1" style="width: 70px;">
           </div>
           <div class="col-1">
             <input type="number" class="form-control form-control-sm border-success"
@@ -479,17 +521,63 @@ Dubai, UAE</textarea>
       if (currentItemIndex === null) return;
       const rows = boxesRows.querySelectorAll(".box-row");
       const newBoxes = [];
+      const boxNumbers = [];
+      
+      // First, collect all box numbers and check for duplicates within this save
       rows.forEach((row) => {
         const inputs = row.querySelectorAll("input");
-        const boxNo = Number(row.dataset.boxNo);
+        const boxNo = inputs[0].value.trim();
+        
+        if (!boxNo) {
+          alert('Please enter a box number for all boxes.');
+          return;
+        }
+        
+        const boxNumber = Number(boxNo);
+        if (isNaN(boxNumber) || boxNumber < 1) {
+          alert('Box number must be a positive number.');
+          return;
+        }
+        
+        boxNumbers.push(boxNumber);
+      });
+      
+      // Check for duplicates within current item
+      const uniqueBoxNumbers = new Set(boxNumbers);
+      if (uniqueBoxNumbers.size !== boxNumbers.length) {
+        alert('Box numbers must be unique within this item.');
+        return;
+      }
+      
+      // Check for duplicates across all items
+      const allExistingBoxNumbers = [];
+      items.forEach((item, index) => {
+        if (index !== currentItemIndex) {
+          item.boxes.forEach((box) => {
+            allExistingBoxNumbers.push(Number(box.boxNo));
+          });
+        }
+      });
+      
+      for (let boxNum of boxNumbers) {
+        if (allExistingBoxNumbers.includes(boxNum)) {
+          alert(`Box number ${boxNum} already exists in another item. Please use a unique number.`);
+          return;
+        }
+      }
+      
+      // All validations passed, save the boxes
+      rows.forEach((row, rowIndex) => {
+        const inputs = row.querySelectorAll("input");
+        const boxNo = inputs[0].value;
         const box = {
-          boxNo,
-          quantity: inputs[0].value,
-          l: inputs[1].value,
-          w: inputs[2].value,
-          h: inputs[3].value,
-          netWeight: inputs[4].value,
-          grossWeight: inputs[5].value,
+          boxNo: boxNo,
+          quantity: inputs[1].value,
+          l: inputs[2].value,
+          w: inputs[3].value,
+          h: inputs[4].value,
+          netWeight: inputs[5].value,
+          grossWeight: inputs[6].value,
         };
         newBoxes.push(box);
       });
@@ -500,6 +588,14 @@ Dubai, UAE</textarea>
 
     // initial one item
     addItem();
+    // sync currency selection to hidden input
+    const currencySelectElem = document.getElementById('currencySelect');
+    if (currencySelectElem) {
+      const currencyHidden = document.getElementById('currencyHidden');
+      currencySelectElem.addEventListener('change', (e) => {
+        if (currencyHidden) currencyHidden.value = e.target.value;
+      });
+    }
   </script>
 </body>
 </html>

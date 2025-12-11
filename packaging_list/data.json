@@ -4,18 +4,37 @@
   "deliveryAddress": "456 Commerce Road\nAbu Dhabi, UAE\nUnited Arab Emirates",
   "date": "2025-12-07",
   "po_no": "PO-2025-0001",
-  "packing_list_no": "7777777777777",
+  "packing_list_no": "PKG-2025-001",
   "loding_port": "Jebel Ali Port",
   "discharge_port": "Rotterdam Port",
   "hs_code": "8471.80",
-  "total_boxes": 0,
+  "total_boxes": 2,
   "items": [
     {
-      "material": "",
-      "description": "",
-      "boxes": []
+      "material": "tt",
+      "description": "tt",
+      "boxes": [
+        {
+          "boxNo": 1,
+          "quantity": "88",
+          "l": "88",
+          "w": "8",
+          "h": "8",
+          "netWeight": "8",
+          "grossWeight": "8"
+        },
+        {
+          "boxNo": 2,
+          "quantity": "8",
+          "l": "8",
+          "w": "8",
+          "h": "8",
+          "netWeight": "8",
+          "grossWeight": "8"
+        }
+      ]
     }
   ],
-  "total_net_weight": "0.00",
-  "total_gross_weight": "0.00"
+  "total_net_weight": "16.00",
+  "total_gross_weight": "16.00"
 }

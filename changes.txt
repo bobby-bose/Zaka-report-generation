@@ -14,7 +14,7 @@ ROFORMA inoce -template exactlys ame IMP ...the template egenarted is worng NOT 
 
 Roform- balance amount in words ..
 
-Unit column - text only 
+Unit column - text only (================ DONT know =========)
 
 
 Amount in words - FRo read-only to INPUT based..should be writable...
