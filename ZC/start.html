@@ -246,14 +246,14 @@ td, th {
 
         {% for row in tableRows %}
         <tr>
-            <td class="left">{{ loop.index }}</td>
-            <td class="left">
-                {% if loop.first %}
+            <td class="left"> {% if loop.first %}
                     AS ADDRESS
-                {% endif %}
+                {% endif %}</td>
+            <td class="left">
+               {{ row.from }} - {{ row.to }}
             </td>
             <td class="left">
-                {{ row.from }} - {{ row.to }}<br>{{ row.description }}
+                {{ row.description }}
             </td>
         </tr>
         {% endfor %}

@@ -208,56 +208,33 @@ let amountInWordsManuallyEdited = false;
 // Function to generate the HTML for a new item row
 function createNewRow(initialPackageStart, initialPackageEnd) {
     rowCount++;
-    const startNum = initialPackageStart || 1;
-    // Default new rows to a 10-unit range if no end is provided
-    const endNum = initialPackageEnd || (startNum + 9); 
+    const rowId = `row-${rowCount}`;
+    const packageStart = initialPackageStart || '';
+    const packageEnd = initialPackageEnd || '';
     
     return `
-        <tr class="item-row" data-row-id="${rowCount}">
+        <tr id="${rowId}" class="item-row">
+            <td><input type="number" class="form-control form-control-sm package-start" min="1" value="${packageStart}" onchange="updatePackageSequence(this.closest('tr'))"></td>
+            <td><input type="number" class="form-control form-control-sm package-end" min="1" value="${packageEnd}" onchange="updatePackageSequence(this.closest('tr'))"></td>
+            <td><input type="text" class="form-control form-control-sm description"></td>
+            <td><input type="text" class="form-control form-control-sm unit"></td>
+            <td><input type="number" class="form-control form-control-sm qty" min="0" step="0.01" value="0" oninput="calculateRowAmount(this.closest('tr')); updateTotals();"></td>
+            <td><input type="number" class="form-control form-control-sm rate" min="0" step="0.01" value="0" oninput="calculateRowAmount(this.closest('tr')); updateTotals();"></td>
+            <td><input type="number" class="form-control form-control-sm amount" value="0.00" readonly></td>
+            <td><input type="number" class="form-control form-control-sm taxable-value" value="0.00" readonly></td>
             <td>
-                <input type="number" class="form-control form-control-sm package-from" value="${startNum}" min="1">
+                <select class="form-select form-select-sm igst-percent" onchange="calculateRowAmount(this.closest('tr')); updateTotals();">
+                    <option value="0">0%</option>
+                    <option value="12">12%</option>
+                    <option value="18">18%</option>
+                    <option value="28">28%</option>
+                </select>
             </td>
-            <td>
-                <input type="number" class="form-control form-control-sm package-to" value="${endNum}" min="${startNum}">
-            </td>
-            <td>
-                <input type="text" class="form-control form-control-sm description" placeholder="Description of Goods">
-            </td>
-            <td>
-                <input type="number" class="form-control form-control-sm unit" value="0" min="0">
-            </td>
-            <td>
-                <input type="number" class="form-control form-control-sm quantity" value="0" min="0">
-            </td>
-            <td>
-                <div class="d-flex align-items-center justify-content-end">
-                    <input type="number" class="form-control form-control-sm rate" value="0.00" min="0" step="0.01" style="flex: 1;">
-                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
-                </div>
-            </td>
-            <td>
-                <div class="d-flex align-items-center justify-content-end">
-                    <input type="text" class="form-control form-control-sm amount" value="0.00" disabled style="flex: 1;">
-                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
-                </div>
-            </td>
-            <td>
-                <input type="number" class="form-control form-control-sm taxable-value" value="0.00" min="0" step="0.01">
-            </td>
-            <td>
-                <input type="number" class="form-control form-control-sm igst-percent" value="0" min="0" max="100" step="0.01">
-            </td>
-            <td>
-                <div class="d-flex align-items-center justify-content-end">
-                    <input type="text" class="form-control form-control-sm igst-amount" value="0.00" disabled style="flex: 1;">
-                    <span class="currency-display ms-2" style="min-width: 15px;"></span>
-                </div>
-            </td>
+            <td><input type="number" class="form-control form-control-sm igst-amount" value="0.00" readonly></td>
             <td class="text-center">
-                <button type="button" class="btn btn-danger btn-sm delete-row-btn" style="background-color: #dc3545; border-color: #dc3545; color: white; font-weight: bold;">🗑️</button>
+                <button type="button" class="btn btn-sm btn-danger remove-row" style="padding: 0.1rem 0.4rem;">×</button>
             </td>
-        </tr>
-    `;
+        </tr>`;
 }
 
 /**
@@ -270,8 +247,8 @@ function updatePackageSequence(changedRow) {
     let currentStart = 1;
 
     rows.forEach((row, index) => {
-        const fromInput = row.querySelector('.package-from');
-        const toInput = row.querySelector('.package-to');
+        const fromInput = row.querySelector('.package-start');
+        const toInput = row.querySelector('.package-end');
         
         let rowRangeWidth = 0;
 
@@ -320,19 +297,28 @@ function updatePackageSequence(changedRow) {
 
 // Function to calculate amount for a single row
 function calculateRowAmount(row) {
-    const unit = parseFloat(row.querySelector('.unit').value) || 0;
-    const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-    const rate = parseFloat(row.querySelector('.rate').value) || 0;
-    const amount = (unit * quantity * rate).toFixed(2);
-    row.querySelector('.amount').value = amount;
+    const qtyInput = row.querySelector('.qty');
+    const rateInput = row.querySelector('.rate');
+    const amountInput = row.querySelector('.amount');
+    const taxableValueInput = row.querySelector('.taxable-value');
+    const igstPercentInput = row.querySelector('.igst-percent');
+    const igstAmountInput = row.querySelector('.igst-amount');
     
-    // Calculate IGST Amount = (IGST % / 100) * Taxable Value
-    const taxableValue = parseFloat(row.querySelector('.taxable-value').value) || 0;
-    const igstPercent = parseFloat(row.querySelector('.igst-percent').value) || 0;
-    const igstAmount = ((igstPercent / 100) * taxableValue).toFixed(2);
-    row.querySelector('.igst-amount').value = igstAmount;
+    const qty = parseFloat(qtyInput.value) || 0;
+    const rate = parseFloat(rateInput.value) || 0;
+    const igstPercent = parseFloat(igstPercentInput.value) || 0;
     
-    return parseFloat(amount);
+    // Calculate amount as qty * rate
+    const amount = qty * rate;
+    const igstAmount = amount * (igstPercent / 100);
+    
+    // Update the read-only fields
+    amountInput.value = amount.toFixed(2);
+    taxableValueInput.value = amount.toFixed(2);
+    igstAmountInput.value = igstAmount.toFixed(2);
+    
+    // Return the calculated values in case they're needed elsewhere
+    return { amount, igstAmount };
 }
 
 // Function to convert number to words (Simplified placeholder as requested)
