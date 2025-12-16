@@ -639,8 +639,8 @@ def get_proforma_invoice(id):
 @app.route('/api/zc-exporter', methods=['GET'])
 def get_zc_exporters():
     try:
-        # Return records ordered by updated_at desc, then created_at desc, then id desc
-        items = ZCExporter.query.order_by(ZCExporter.updated_at.desc(), ZCExporter.created_at.desc(), ZCExporter.id.desc()).all()
+        # Return records ordered by id desc, then created_at desc
+        items = ZCExporter.query.order_by(ZCExporter.id.desc(), ZCExporter.created_at.desc()).all()
         return jsonify([{
             'id': item.id,
             'invoiceNumber': item.invoice_number or '',
