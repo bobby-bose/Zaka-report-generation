@@ -257,7 +257,7 @@
                             const tr = document.createElement('tr');
                             tr.setAttribute('data-id', row.id);
                             tr.innerHTML = `
-                                <td>${idx + 1}</td>
+                                <td>${row.id}</td>
                                 <td>${row.invoiceNo}</td>
                                 <td>${row.poWoNumber || '-'}</td>
                                 <td>${row.billToAddress || '-'}</td>
@@ -301,7 +301,7 @@
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-id', row.id);
                 tr.innerHTML = `
-                    <td>${idx + 1}</td>
+                    <td>${row.id}</td>
                     <td>${row.invoiceNo}</td>
                     <td>${row.poWoNumber}</td>
                     <td>${row.billToAddress}</td>

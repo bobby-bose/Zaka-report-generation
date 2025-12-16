@@ -209,7 +209,7 @@
                             const tr = document.createElement('tr');
                             tr.setAttribute('data-id', row.id);
                             tr.innerHTML = `
-                                <td>${index + 1}</td>
+                                <td>${row.id}</td>
                                 <td>${row.invoiceNumber || '-'}</td>
                                 <td>${row.invoiceDate || '-'}</td>
                                 <td>${row.exporterReference || '-'}</td>
