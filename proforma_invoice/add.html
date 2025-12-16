@@ -128,13 +128,17 @@
         }
 
         /* --- 7. Summary Box Field Layout --- */
-        .summary-box .col-md-4 {
+        .summary-box .col-md-4,
+        .summary-box .col-md-6 {
             padding-left: 5px;
             padding-right: 5px;
         }
         .summary-box .row {
             --bs-gutter-x: 0;
             margin-bottom: 10px;
+        }
+        .summary-box .row.g-3 {
+            --bs-gutter-x: 1rem;
         }
 
         /* --- 8. Submit Button --- */
@@ -154,26 +158,37 @@
     </div>
     
     
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
             <label for="invoiceDate" class="form-label">Invoice Date</label>
             <input type="date" class="form-control" id="invoiceDate" value="">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="invoiceNo" class="form-label">Invoice No</label>
             <input type="text" class="form-control" id="invoiceNo" value="">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label for="poWoNumber" class="form-label">PO/WO Number</label>
             <input type="text" class="form-control" id="poWoNumber" value="">
         </div>
-        <div class="col-md-2">
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
             <label for="yourRefNo" class="form-label">Our Reference No</label>
             <input type="text" class="form-control" id="yourRefNo" value="">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label for="yourReferenceNo" class="form-label">Your Reference No</label>
             <input type="text" class="form-control" id="yourReferenceNo" placeholder="">
+        </div>
+        <div class="col-md-4">
+            <label for="currencySelect" class="form-label">Currency</label>
+            <select class="form-select" id="currencySelect">
+                <option value="USD" selected>USD ($)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="EUR">EUR (€)</option>
+            </select>
         </div>
     </div>
 
@@ -239,14 +254,7 @@
 
     <div class="summary-box">
         <div class="row">
-             <div class="col-12">
-                   <label for="receivableAmount" class="form-label">Receivable Amount</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="receivableAmount" >
-                    <span class="input-group-text currency-display"></span>
-                </div>
-    
-                       </div>
+           
             <div class="col-md-4">
                 <label for="totalAmount" class="form-label">Total Amount</label>
                 <div class="input-group">
@@ -255,51 +263,57 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <label for="currencySelect" class="form-label">Currency</label>
-                <select class="form-select" id="currencySelect">
-                    <option value="USD" selected>USD ($)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="EUR">EUR (€)</option>
-                </select>
-            </div>
-            <div class="col-md-4">
                 <label for="discountPercentage" class="form-label">Discount (%)</label>
                 <div class="input-group">
                     <input type="number" class="form-control" id="discountPercentage" value="0" min="0" max="100" step="0.01">
                     <span class="input-group-text">%</span>
                 </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
+             <div class="col-md-4">
                 <label for="discountAmount" class="form-label">Discount Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <label for="portOfDischarge" class="form-label">Port of Discharge</label>
-                <input type="text" class="form-control" id="portOfDischarge" value="Rotterdam Port">
-     
-                     </div>
-            <div class="col-md-4">
+        </div>
+
+        <div class="row g-3">
+           
+           
+ <div class="col-md-5">
+<label for="receivableAmount" class="form-label">Received Amount Details</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="receivableAmount" >
+           
+                </div>
+            </div>
+
+            <div class="col-md-3">
                 <label for="receivedAmount" class="form-label">Received Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., 5000.00">
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
-        </div>
 
-        <div class="row mb-0">
+               
+
+
             <div class="col-md-4">
-                <label for="balanceAmount" class="form-label">Balance Amount</label>
+                 <label for="balanceAmount" class="form-label">Balance Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
                     <span class="input-group-text currency-display"></span>
                 </div>
+                     </div>
+        </div>
+
+        <div class="row mb-0">
+            <div class="col-md-4">
+                <label for="portOfDischarge" class="form-label">Port of Discharge</label>
+                <input type="text" class="form-control" id="portOfDischarge" value="Rotterdam Port">
+     
             </div>
             <div class="col-md-4">
                 <label for="countryOfOrigin" class="form-label">Country of Origin</label>

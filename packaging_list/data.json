@@ -1,48 +1,21 @@
 {
-  "consigneeAddress": "123 Main Street\nDubai, UAE\nUnited Arab Emirates",
-  "taxNumber": "UAE-12345678-1200",
-  "deliveryAddress": "456 Commerce Road\nAbu Dhabi, UAE\nUnited Arab Emirates",
-  "date": "2025-12-07",
-  "po_no": "ooooooo",
-  "packing_list_no": "kkkkk",
-  "loding_port": "Jebel Ali Port",
-  "discharge_port": "Rotterdam Port",
-  "hs_code": "8471.80",
-  "total_boxes": 5,
+  "consigneeAddress": "gg",
+  "taxNumber": "g",
+  "deliveryAddress": "gg",
+  "date": "2025-12-17",
+  "po_no": "gg",
+  "packing_list_no": "gg",
+  "loding_port": "gg",
+  "discharge_port": "gg",
+  "hs_code": "gg",
+  "total_boxes": 1,
   "items": [
     {
-      "material": "jj",
-      "description": "jj",
+      "material": "hh",
+      "description": "hh",
       "boxes": [
         {
-          "boxNo": "5",
-          "quantity": "3",
-          "l": "3",
-          "w": "3",
-          "h": "3",
-          "netWeight": "3",
-          "grossWeight": "3"
-        },
-        {
-          "boxNo": "6",
-          "quantity": "6",
-          "l": "6",
-          "w": "6",
-          "h": "6",
-          "netWeight": "6",
-          "grossWeight": "6"
-        },
-        {
-          "boxNo": "3",
-          "quantity": "3",
-          "l": "3",
-          "w": "3",
-          "h": "3",
-          "netWeight": "3",
-          "grossWeight": "3"
-        },
-        {
-          "boxNo": "2",
+          "boxNo": "1",
           "quantity": "2",
           "l": "2",
           "w": "2",
@@ -51,23 +24,8 @@
           "grossWeight": "2"
         }
       ]
-    },
-    {
-      "material": "oo",
-      "description": "oo",
-      "boxes": [
-        {
-          "boxNo": "1",
-          "quantity": "1",
-          "l": "1",
-          "w": "1",
-          "h": "1",
-          "netWeight": "1",
-          "grossWeight": "1"
-        }
-      ]
     }
   ],
-  "total_net_weight": "15.00",
-  "total_gross_weight": "15.00"
+  "total_net_weight": "2.00",
+  "total_gross_weight": "2.00"
 }

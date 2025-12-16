@@ -1,37 +1,37 @@
 {
-  "bill_to_address": "rr",
-  "date": "2025-12-10",
-  "invoice_no": "r",
-  "po_wo_number": "r",
-  "your_reference_no": "r",
-  "our_reference_no": "r",
-  "currency": "USD",
+  "bill_to_address": "i",
+  "date": "2025-12-12",
+  "invoice_no": "ii",
+  "po_wo_number": "ii",
+  "your_reference_no": "i",
+  "our_reference_no": "i",
+  "currency": "INR",
   "items": [
     {
       "lineNo": 1,
-      "partNumber": "r",
-      "description": "r",
-      "quantity": "4",
-      "unitRate": "4",
-      "total": "16.00"
+      "partNumber": "i",
+      "description": "i",
+      "quantity": "100",
+      "unitRate": "100",
+      "total": "10000.00"
     },
     {
       "lineNo": 2,
-      "partNumber": "r",
-      "description": "r",
-      "quantity": "4",
-      "unitRate": "4",
-      "total": "16.00"
+      "partNumber": "u",
+      "description": "u",
+      "quantity": "100",
+      "unitRate": "100",
+      "total": "10000.00"
     }
   ],
-  "total_amount": "32.00",
-  "discount_percent": "3",
-  "discount_amount": "0.96",
-  "received_details": "Received Amount",
-  "received_amount": "20",
-  "balance_amount": "31.04",
-  "country_of_origin": "India",
-  "port_of_embarkation": "Jebel Ali Port",
+  "total_amount": "20000.00",
+  "discount_percent": "10",
+  "discount_amount": "2000.00",
+  "received_details": "cheque with csh",
+  "received_amount": "500.00",
+  "balance_amount": "17500.00",
+  "country_of_origin": "mm",
+  "port_of_embarkation": "mmm",
   "port_of_discharge": "Rotterdam Port",
-  "date_created": "2025-12-11"
+  "date_created": "2025-12-16"
 }

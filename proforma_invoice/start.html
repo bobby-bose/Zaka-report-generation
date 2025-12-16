@@ -204,20 +204,53 @@ Kerala - Thrissur, India, Pin-680685
 </tr>
 {% endfor %}
 
+   <!-- TOTAL AMOUNT -->
+        <tr>
+            <td colspan="4" class="text-center" style="font-weight:bold;">
+                Total Amount in {{ currency }}
+            </td>
+            <td class="text-right" style="font-weight:bold;">
+                {{ total_amount }}
+            </td>
+        </tr>
 
-<tr>
-<td colspan="3"><span class="label">Total Amount (US$)</span></td>
-<td class="text-right" colspan="2">{{ total_amount }}</td>
-</tr>
-<tr>
-<td colspan="3"><span class="label" >Receivable Amount ({{ discount_percent }}%)</span></td>
-<td class="text-right" colspan="2">{{ discount_amount }}</td>
-</tr>
+        <!-- RECEIVABLE AMOUNT -->
+        <tr>
+            <td colspan="4" style="font-weight:bold;">
+                Receivable Amount ({{ discount_percent }}%)<br>
+                <span style="text-transform:uppercase;">
+                    {{ receivable_amount_words }}
+                </span>
+            </td>
+            <td class="text-right" style="font-weight:bold;">
+                {{ discount_amount }}
+            </td>
+        </tr>
 
-<tr>
-<td colspan="3"><span class="label">Balance receivable of {{ discount_percent }}% Advance</span></td>
-<td class="text-right" colspan="2">{{ balance_amount }}</td>
-</tr>
+        <!-- BANK RECEIVED -->
+        <tr>
+            <td colspan="4">
+                {{received_details }}
+            </td>
+            <td class="text-right">
+                {{ received_amount }}
+            </td>
+        </tr>
+
+        <!-- BALANCE RECEIVABLE -->
+        <tr>
+            <td colspan="4" style="font-weight:bold;">
+                Balance receivable of {{ discount_percent }}% Advance<br>
+                <span style="text-transform:uppercase;">
+                    {{ balance_amount_words }}
+                </span>
+            </td>
+            <td class="text-right" style="font-weight:bold;">
+                {{ balance_amount }}
+            </td>
+        </tr>
+
+    </tbody>
 </table>
 
 <div style="height: 20px;">

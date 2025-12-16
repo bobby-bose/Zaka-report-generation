@@ -142,13 +142,17 @@
         }
 
         /* --- 7. Summary Box Field Layout --- */
-        .summary-box .col-md-4 {
+        .summary-box .col-md-4,
+        .summary-box .col-md-6 {
             padding-left: 5px;
             padding-right: 5px;
         }
         .summary-box .row {
             --bs-gutter-x: 0;
             margin-bottom: 10px;
+        }
+        .summary-box .row.g-3 {
+            --bs-gutter-x: 1rem;
         }
 
         /* --- 8. Submit Button --- */
@@ -173,26 +177,37 @@
         <div class="invoice-title">Proforma Invoice - Edit</div>
     </div>
     
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
             <label for="invoiceDate" class="form-label">Invoice Date</label>
             <input type="date" class="form-control" id="invoiceDate">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="invoiceNo" class="form-label">Invoice No</label>
             <input type="text" class="form-control" id="invoiceNo">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label for="poWoNumber" class="form-label">PO/WO Number</label>
             <input type="text" class="form-control" id="poWoNumber">
         </div>
-        <div class="col-md-2">
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
             <label for="yourRefNo" class="form-label">Our Reference No</label>
             <input type="text" class="form-control" id="yourRefNo">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label for="yourReferenceNo" class="form-label">Your Reference No</label>
             <input type="text" class="form-control" id="yourReferenceNo">
+        </div>
+        <div class="col-md-4">
+            <label for="currencySelect" class="form-label">Currency</label>
+            <select class="form-select" id="currencySelect">
+                <option value="USD" selected>USD ($)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="EUR">EUR (€)</option>
+            </select>
         </div>
     </div>
 
@@ -247,6 +262,7 @@
 
     <div class="summary-box">
         <div class="row">
+           
             <div class="col-md-4">
                 <label for="totalAmount" class="form-label">Total Amount</label>
                 <div class="input-group">
@@ -255,50 +271,57 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <label for="currencySelect" class="form-label">Currency</label>
-                <select class="form-select" id="currencySelect">
-                    <option value="USD" selected>USD ($)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="EUR">EUR (€)</option>
-                </select>
-            </div>
-            <div class="col-md-4">
                 <label for="discountPercentage" class="form-label">Discount (%)</label>
-                <input type="number" class="form-control" id="discountPercentage" value="0">
+                <div class="input-group">
+                    <input type="number" class="form-control" id="discountPercentage" value="0" min="0" max="100" step="0.01">
+                    <span class="input-group-text">%</span>
+                </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-4">
+             <div class="col-md-4">
                 <label for="discountAmount" class="form-label">Discount Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <label for="receivableAmount" class="form-label">Receivable Amount</label>
+        </div>
+
+        <div class="row g-3">
+           
+           
+ <div class="col-md-5">
+<label for="receivableAmount" class="form-label">Received Amount Details</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="receivableAmount" readonly>
-                    <span class="input-group-text currency-display"></span>
+                    <input type="text" class="form-control" id="receivableAmount">
+           
                 </div>
             </div>
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <label for="receivedAmount" class="form-label">Received Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="receivedAmount" placeholder="e.g., 5000.00">
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
-        </div>
 
-        <div class="row mb-0">
+               
+
+
             <div class="col-md-4">
-                <label for="balanceAmount" class="form-label">Balance Amount</label>
+                 <label for="balanceAmount" class="form-label">Balance Amount</label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="balanceAmount" value="0.00" readonly>
                     <span class="input-group-text currency-display"></span>
                 </div>
+                     </div>
+        </div>
+
+        <div class="row mb-0">
+            <div class="col-md-4">
+                <label for="portOfDischarge" class="form-label">Port of Discharge</label>
+                <input type="text" class="form-control" id="portOfDischarge">
+     
             </div>
             <div class="col-md-4">
                 <label for="countryOfOrigin" class="form-label">Country of Origin</label>
@@ -308,15 +331,7 @@
                 <label for="portOfEmbarkation" class="form-label">Port of Embarkation</label>
                 <input type="text" class="form-control" id="portOfEmbarkation">
             </div>
-        </div>
-    </div>
-
-    <div class="discharge-box mb-4">
-        <div class="row">
-            <div class="col-12">
-                <label for="portOfDischarge" class="form-label">Port of Discharge</label>
-                <input type="text" class="form-control" id="portOfDischarge">
-            </div>
+           
         </div>
     </div>
 
@@ -365,6 +380,7 @@
                     document.getElementById('billToAddress').value = data.billToAddress || '';
                     document.getElementById('currencySelect').value = data.currency || 'USD';
                     document.getElementById('discountPercentage').value = data.discountPercentage || '0';
+                    document.getElementById('receivableAmount').value = (data.receivableAmount ?? data.receivedDetails ?? data.received_details ?? '');
                     
                     // Update currency symbols
                     updateCurrencySymbols();
@@ -418,6 +434,7 @@
         const discountPercentageInput = document.getElementById('discountPercentage');
         const discountAmountInput = document.getElementById('discountAmount');
         const receivableAmountInput = document.getElementById('receivableAmount');
+        const receivedAmountInput = document.getElementById('receivedAmount');
         const balanceAmountInput = document.getElementById('balanceAmount');
 
         // Function to create a new line item row HTML string
@@ -467,17 +484,15 @@
             const discountAmount = grandTotal * (discountPercent / 100);
             discountAmountInput.value = discountAmount.toFixed(2);
 
-            // 3. Subtotal after Discount
-            const subTotal = grandTotal - discountAmount;
+            // 3. Keep Received Amount Details as user-entered (do not overwrite)
+            if (receivableAmountInput && receivableAmountInput.value === undefined) {
+                receivableAmountInput.value = '';
+            }
 
-            // 4. Receivable Amount (50%)
-            const receivableAmount = subTotal * 0.50;
-            receivableAmountInput.value = receivableAmount.toFixed(2);
-
-            // 5. Balance Amount (Assuming Received Amount is 0 for initial calculation)
-            // Note: If Received Amount were dynamic, we would subtract it here.
-            // Since it's fixed at "zero dollars", the balance is the subtotal.
-            balanceAmountInput.value = subTotal.toFixed(2);
+            // 4. Balance Amount (Total - Discount - Received)
+            const receivedAmount = parseFloat(receivedAmountInput.value) || 0;
+            const balance = Math.max(0, (grandTotal - discountAmount - receivedAmount));
+            balanceAmountInput.value = balance.toFixed(2);
         };
 
         // Function to handle row input changes and re-run calculations
@@ -547,6 +562,7 @@
         // Event listeners for calculating on input changes in the table and discount fields
         lineItemsBody.addEventListener('input', handleInputChange);
         discountPercentageInput.addEventListener('input', updateSummary);
+        receivedAmountInput.addEventListener('input', updateSummary);
 
         // Update button handler
         updateBtn.addEventListener('click', () => {

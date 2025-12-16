@@ -240,7 +240,7 @@ def proforma_invoice_print(id):
             'total_amount': record.total_amount or '0.00',
             'discount_percent': record.discount_percentage or '0',
             'discount_amount': record.discount_amount or '0.00',
-            'received_details': 'Received Amount',
+            'received_details': record.receivable_amount or '',
             'received_amount': record.received_amount or '0.00',
             'balance_amount': record.balance_amount or '0.00',
             'country_of_origin': record.country_of_origin or '',
