@@ -1,0 +1,158 @@
+
+
+Do this. No alternatives.
+
+---
+
+### 1) Force proper A4 landscape and remove browser margins
+
+Add **this exactly** at the top of your CSS:
+
+```css
+@page {
+    size: A4 landscape;
+    margin: 10mm;
+}
+```
+
+---
+
+### 2) Kill percentage-based container spacing for print
+
+Replace your `.container` rules with this:
+
+```css
+.container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+```
+
+And in `@media print` keep it simple:
+
+```css
+@media print {
+    html, body {
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+```
+
+Remove **all mm widths** like `200mm`. Let the page control width.
+
+---
+
+### 3) Fix font scaling for print (this is critical)
+
+Change body font size:
+
+```css
+body {
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+}
+```
+
+Then explicitly control headers only:
+
+```css
+.header-title {
+    font-size: 14pt;
+}
+.address-text {
+    font-size: 11pt;
+}
+.detail-table th {
+    font-size: 9pt;
+}
+.detail-table td {
+    font-size: 9pt;
+}
+```
+
+Never use `%` for font-size in print.
+
+---
+
+### 4) Fix logo causing horizontal overflow
+
+Replace `.logo-box` completely:
+
+```css
+.logo-box {
+    border: 1px solid #000;
+    margin: 6px;
+    width: 120px;
+    height: auto;
+    max-height: 60px;
+    object-fit: contain;
+}
+```
+
+Remove `height: 180%`.
+
+---
+
+### 5) Remove absolute positioning from header text
+
+This breaks print layout:
+
+```css
+.company-address {
+    position: static;
+    transform: none;
+    text-align: center;
+    font-size: 10pt;
+}
+```
+
+Absolute positioning + print = spacing chaos.
+
+---
+
+### 6) Tables must not exceed page width
+
+Add this globally:
+
+```css
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+```
+
+And reduce column widths slightly:
+
+```css
+.item-no { width: 6%; }
+.material-desc { width: 28%; }
+.box-no { width: 7%; }
+.qty { width: 7%; }
+.dimension { width: 22%; }
+.net-weight { width: 15%; }
+.gross-weight { width: 15%; }
+```
+
+---
+
+### 7) Browser print dialog (non-negotiable)
+
+When printing:
+
+* Layout: **Landscape**
+* Margins: **None**
+* Scale: **100%**
+* Disable headers and footers
+
+---

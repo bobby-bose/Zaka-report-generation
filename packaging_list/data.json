@@ -1,31 +1,64 @@
 {
-  "consigneeAddress": "kkk",
-  "taxNumber": "k",
-  "deliveryAddress": "kk",
-  "date": "2025-12-10",
-  "po_no": "k",
-  "packing_list_no": "k",
-  "loding_port": "k",
-  "discharge_port": "k",
-  "hs_code": "k",
-  "total_boxes": 1,
+  "consigneeAddress": " Address One Address One\nAddress One Address One\nAddress One Address One",
+  "taxNumber": "mmm",
+  "deliveryAddress": " Address One Address One\nAddress One Address One\nAddress One Address One",
+  "date": "2026-01-22",
+  "po_no": "4546465",
+  "packing_list_no": "qwerty123456",
+  "loding_port": "mm",
+  "discharge_port": "mmm",
+  "hs_code": "mmm",
+  "total_boxes": 4,
   "items": [
     {
-      "material": "k",
-      "description": "k",
+      "material": "mmm",
+      "description": "mmm",
       "boxes": [
         {
           "boxNo": "1",
-          "quantity": "2",
+          "quantity": "3",
           "l": "2",
           "w": "2",
           "h": "2",
           "netWeight": "2",
           "grossWeight": "2"
+        },
+        {
+          "boxNo": "3",
+          "quantity": "3",
+          "l": "3",
+          "w": "3",
+          "h": "3",
+          "netWeight": "3",
+          "grossWeight": "3"
+        }
+      ]
+    },
+    {
+      "material": "oo",
+      "description": "oo",
+      "boxes": [
+        {
+          "boxNo": "8",
+          "quantity": "8",
+          "l": "8",
+          "w": "8",
+          "h": "8",
+          "netWeight": "8",
+          "grossWeight": "8"
+        },
+        {
+          "boxNo": "9",
+          "quantity": "9",
+          "l": "9",
+          "w": "9",
+          "h": "9",
+          "netWeight": "9",
+          "grossWeight": "9"
         }
       ]
     }
   ],
-  "total_net_weight": "2.00",
-  "total_gross_weight": "2.00"
+  "total_net_weight": "22.00",
+  "total_gross_weight": "22.00"
 }

@@ -5,147 +5,238 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Packing List – Page 1</title>
 <style>
-    /* Print settings for A4 paper */
-    @page { size: A4; margin: 5mm; }
+    /* Print settings for A4 landscape */
+
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
     body {
         font-family: Arial, sans-serif;
-        font-size: 15pt; /* Adjusting font size to fit more content */
+        font-size: 10pt;
         color: #000;
         background: #fff;
         margin: 0;
     }
     .container {
         width: 100%;
-        max-width: 12in; /* Standard printable width for A4 */
-        margin: 0 auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    @media print {
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            min-height: 171mm;
+            box-sizing: border-box;
+        }
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed;
     }
     .header {
-        text-align: center;
-        margin-bottom: 10px;
-     
-        
+        border: 1px solid #000;
     }
-    .header-img {
-        width: 100%;
-        height: 100%; /* Reduced height for better fit */
+    .header-row1 {
+        display: flex;
+        align-items: center;
+        
+        border-bottom: 1px solid #000;
+    }
+    .logo-box {
+        border: 1px solid #000;
+        margin: 6px;
+        width: 20%;
+        height: auto;
+        
         object-fit: contain;
+    }
+    .address-text {
+        flex: 1;
+        text-align: center;
+        font-size: 1.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        align-self: end;
+    }
+    .header-row2 {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #000;
+    }
+    .header-title {
+        font-size: 14pt;
+        font-weight: bold;
+        margin: 0;
+    }
+    .company-address {
+        position: static;
+        transform: none;
+        text-align: center;
+        font-size: 10pt;
+        white-space: nowrap;
     }
     p {
         text-align: center;
         margin: 5px 0 10px 0;
         font-size: 12pt;
-      
     }
-    .header { font-size: 18pt; font-weight: bold; margin:0 }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
 
-    /* All Tables Styling */
-    .info-table, .detail-table {
+    /* Main item table with optimized column widths */
+    .detail-table {
         width: 100%;
         border-collapse: collapse;
-        
     }
-    .info-table td, .detail-table th, .detail-table td {
+    .detail-table th, .detail-table td {
         border: 1px solid #000;
-        padding: 4px 6px;
+        padding: 3px 4px;
         vertical-align: top;
-        height: 1.5em; /* Ensure uniform row height */
     }
     .detail-table th {
         background: #f0f0f0;
         font-weight: bold;
         text-align: center;
+        font-size: 9pt;
     }
-    .label-third {
-        padding:5%;
+    .detail-table td {
+        font-size: 9pt;
     }
+    .item-no { width: 6%; }
+    .material-desc { width: 28%; }
+    .box-no { width: 7%; }
+    .qty { width: 7%; }
+    .dimension { width: 22%; }
+    .net-weight { width: 15%; }
+    .gross-weight { width: 15%; }
+    /* Three column layout for main info */
+    .three-column-table {
+        width: 100%;
+        border-collapse: collapse;
     
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
+    }
+    .three-column-table td {
+        border: 1px solid #000;
+        padding: 6px;
+        vertical-align: top;
+    }
+    .left-column {
+        width: 40%;
+    }
+    .center-column {
+        width: 35%;
+    }
+    .right-column {
+        width: 25%;
+    }
+    .meta-row {
+        border-bottom: 1px solid #000;
+        padding: 3px 0;
+        margin-bottom: 2px;
+    }
+    .meta-row:last-child {
+        border-bottom: none;
+    }
 </style>
 </head>
 <body>
 <div class="container">
 
     <div class="header">
- <img src="/static/logo.jpg" alt="Company Logo" class="header-img">
-        <p class="header">Packing List</p>
+        <div class="header-row1">
+           
+                <img src="/static/logo.jpg" class="logo-box" alt="Company Logo">
+            
+            <div class="address-text">
+                IX 67/A, NH-66, Kodungallur, Kerala- 680668, India
+            </div>
+        </div>
+        <div class="header-row2">
+            <div class="header-title">Packing List</div>
+        </div>
     </div>
 
-<table class="info-table" style="width:100%; border-collapse:collapse;">
+<!-- Three column layout: Consignee | Exporter | Meta -->
+<table class="three-column-table">
     <tr>
-
-        <!-- LEFT BLOCK -->
-        <td style="width:50%; padding:0; vertical-align:top;border:none;">
-            <table style="width:100%; border-collapse:collapse;">
-                <tr>
-                    <td style="padding-bottom:10px;">
-                        <span class="label" style="font-weight:bold; text-decoration:underline;">Consignee</span><br>
-                     <span class="label" style="margin-left:3%; display:block; padding-left:15px;">"{{ consigneeAddress | replace('\n', '<br>') | safe }}<br><br>
-                          Tax Registration Number: {{ taxNumber }}</span>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td style="padding-top:10px;">
-                        <span class="label" style="font-weight:bold; text-decoration:underline;">Delivery Address</span><br><br>
-                        <span class="label" style="margin-left:3%; display:block; padding-left:15px;">{{ deliveryAddress | replace('\n', '<br>') | safe }}</span>
-                   <br> </td>
-                </tr>
-            </table>
+        <!-- Left Column: Consignee + Delivery Address -->
+        <td class="left-column">
+            <div style="margin-bottom: 8px;">
+                <span style="font-weight:bold; text-decoration:underline;">Consignee</span><br>
+                <span style="display:block; padding-left:10px; margin-top:3px;">
+                    {{ consigneeAddress | replace('\n', '<br>') | safe }}<br>
+                    Tax Registration Number: {{ taxNumber }}
+                </span>
+            </div>
+            <div>
+                <span style="font-weight:bold; text-decoration:underline;">Delivery Address</span><br>
+                <span style="display:block; padding-left:10px; margin-top:3px;">
+                    {{ deliveryAddress | replace('\n', '<br>') | safe }}
+                </span>
+            </div>
         </td>
-
-        <!-- MIDDLE BLOCK -->
-        <td style="width:25%; padding:10px; border-right:1px solid #000; vertical-align:top;border-left:none;">
-            <span class="label" style="font-weight:bold;">Exporter:</span><br><br>
+        
+        <!-- Center Column: Exporter -->
+        <td class="center-column">
+            <span style="font-weight:bold;">Exporter:</span><br>
             Zaka Controls & Devices<br>
             IX 67/A, NH-66, Kodungallur,<br>
             KERALA- 680668<br>
             INDIA<br><br>
             GST No. 32ERGPS8045J1ZD
         </td>
-
-        <!-- RIGHT BLOCK -->
-<td style="width:25%; padding:0; vertical-align:top;">
-    
-    <div style="margin-bottom:5px; border-bottom:1px solid #000; padding:3px 0;">
-        <span class="label-third">Date : {{ date }}</span>
-    </div>
-
-    <div style="margin-bottom:5px; border-bottom:1px solid #000; padding:3px 0;">
-        <span class="label-third">PO / {{ po_no }}</span>
-    </div>
-
-    <div style="height:60%; display:flex; justify-content:center; align-items:center; text-align:center;">
-        <span class="label-third">Packing List No: {{ packing_list_no }}</span>
-    </div>
-
-</td>
-
-
+        
+        <!-- Right Column: Meta Info -->
+        <td class="right-column">
+            <div class="meta-row">
+                <span><strong>Date:</strong> {{ date }}</span>
+            </div>
+            <div class="meta-row">
+                <span><strong>PO:</strong> {{ po_no }}</span>
+            </div>
+            <div class="meta-row">
+                <span><strong>Packing List No:</strong> {{ packing_list_no }}</span>
+            </div>
+        </td>
     </tr>
 </table>
 
-    <table class="info-table">
-        <tbody>
-            <tr>
-                <td style="width: 25%;"><span class="label">Loding Port</span> {{ loding_port }}</td>
-                <td style="width: 25%;"><span class="label">Discharge Port</span> {{ discharge_port }}</td>
-                <td style="width: 25%;"><span class="label">HS Code :</span> {{ hs_code }}</td>
-                <td style="width: 25%;"><span class="label">No of Boxes:</span> {{ total_boxes }}</td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Single horizontal row for ports/HS code/box count -->
+<table class="three-column-table">
+    <tr>
+        <td><strong>Loading Port:</strong> {{ loding_port }}</td>
+        <td><strong>Discharge Port:</strong> {{ discharge_port }}</td>
+        <td><strong>HS Code:</strong> {{ hs_code }}</td>
+        <td><strong>No of Boxes:</strong> {{ total_boxes }}</td>
+    </tr>
+</table>
 
     <table class="detail-table">
         <thead>
             <tr>
-                <th style="width: 10%;">Item No.</th>
-                <th style="width: 20%;">Material & Packing Description</th>
-                <th style="width: 10%;">Box No.</th>
-                <th style="width: 10%;">Qty</th>
-                <th style="width: 25%;">Dimension</th>
-                <th style="width: 12.5%;">Net Weight (Kg)</th>
-                <th style="width: 12.5%;">Gross Weight (Kg)</th>
+                <th class="item-no">PO/Item No.</th>
+                <th class="material-desc">Material & Packing Description</th>
+                <th class="box-no">Box No.</th>
+                <th class="qty">Qty</th>
+                <th class="dimension">Dimension</th>
+                <th class="net-weight">Net Weight (Kg)</th>
+                <th class="gross-weight">Gross Weight (Kg)</th>
             </tr>
         </thead>
         <tbody>
@@ -156,41 +247,32 @@
                 <tr>
                     {# Item No. and Material: Use rowspan on the first box only #}
                     {% if loop.first %}
-                    <td rowspan="{{ box_count }}" class="text-center" style="vertical-align: middle;">{{ item.item_number or outer_loop.index }}</td>
-                    <td rowspan="{{ box_count }}" class="text-center" style="vertical-align: middle;">{{ item.material }},{{ item.description }}</td>
+                    <td class="item-no" rowspan="{{ box_count }}" style="vertical-align: middle;">{{ item.item_number or outer_loop.index }}</td>
+                    <td class="material-desc" rowspan="{{ box_count }}" style="vertical-align: middle;">{{ item.material }},{{ item.description }}</td>
                     {% endif %}
 
                     {# Box-specific details (always rendered) #}
-                    <td class="text-center">{{ box.boxNo }}</td>
-                    <td class="text-center">{{ box.quantity }}</td>
-                    <td class="text-center">{{ box.l }} (L) x {{ box.w }} (W) x {{ box.h }} (H) cm</td>
-                    <td class="text-center">{{ box.netWeight }}</td>
-                    <td class="text-center">{{ box.grossWeight }}</td>
+                    <td class="box-no text-center">{{ box.boxNo }}</td>
+                    <td class="qty text-center">{{ box.quantity }}</td>
+                    <td class="dimension text-center">{{ box.l }} (L) x {{ box.w }} (W) x {{ box.h }} (H) cm</td>
+                    <td class="net-weight text-center">{{ box.netWeight }}</td>
+                    <td class="gross-weight text-center">{{ box.grossWeight }}</td>
                 </tr>
                 {% endfor %}
             {% endfor %}
 
-            {# Total Row #}
+            {# Total Row with proper alignment #}
             <tr style="font-weight: bold; background-color: #f5f5f5;">
-                <td colspan="5" class="text-center">Total</td>
+                <td colspan="5" style="text-align: left; padding-left: 10px;">Total</td>
                 <td class="text-right">{{ total_net_weight }}</td>
                 <td class="text-right">{{ total_gross_weight }}</td>
             </tr>
         </tbody>
     </table>
 
-    <div style="margin-top: 40px; text-align: right;height:80px;">
-        <div>
+   
 
-        </div>
-        <div>
-            
-        </div>
-           </div>
-
-    <div style="margin-top: 20px; text-align: center; border-top: 2px solid #000; padding-top: 10px;">
-        <img src="/static/footer.jpg" alt="Company Logo" style="width: 100%; max-width: 12in; height: auto; object-fit: contain;">
-    </div>
+   
 
 </div>
 </body>
