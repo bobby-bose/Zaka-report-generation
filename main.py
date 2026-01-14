@@ -1004,7 +1004,8 @@ def get_packaging_lists():
             'consigneeAddress': item.consigneeAddress or '',
             'status': item.status or 'Completed',
             'createdAt': item.created_at.strftime('%Y-%m-%d') if item.created_at else '',
-            'updatedAt': item.updated_at.strftime('%Y-%m-%d %H:%M:%S') if item.updated_at else ''
+            # PackagingList currently does not have updated_at; keep key for UI compatibility
+            'updatedAt': item.created_at.strftime('%Y-%m-%d %H:%M:%S') if item.created_at else ''
         } for item in items]), 200
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
