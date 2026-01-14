@@ -1,5 +1,6 @@
 from flask import Flask, render_template, send_from_directory, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 import os
 import json
 import sys
@@ -180,6 +181,31 @@ class ZCExporter(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+
+def _ensure_packaging_list_schema():
+    if not (db.engine and db.engine.url and db.engine.url.drivername and db.engine.url.drivername.startswith('sqlite')):
+        return
+
+    wanted = {
+        'currency': "VARCHAR(10) DEFAULT 'USD'",
+        'moduleAType': 'VARCHAR(10)',
+        'moduleA_data': 'TEXT',
+        'moduleBType': 'VARCHAR(10)',
+        'moduleB_data': 'TEXT',
+        'total_net_weight': 'REAL DEFAULT 0.0',
+        'total_gross_weight': 'REAL DEFAULT 0.0',
+        'status': "VARCHAR(20) DEFAULT 'Completed'",
+        'created_at': 'DATETIME',
+    }
+
+    with db.engine.begin() as conn:
+        cols = conn.execute(text('PRAGMA table_info(packaging_list)')).fetchall()
+        existing = {row[1] for row in cols}
+        for col, ddl in wanted.items():
+            if col in existing:
+                continue
+            conn.execute(text(f'ALTER TABLE packaging_list ADD COLUMN {col} {ddl}'))
+
 # Define the folders and their routes
 FORMS = {
     'Packaging List': '/packaging_list/view',
@@ -254,8 +280,48 @@ def packaging_list_print(id):
         if not record:
             return jsonify({'success': False, 'message': 'Record not found'}), 404
         
+        def _as_dict(v):
+            if v is None:
+                return {}
+            if isinstance(v, dict):
+                return v
+            if isinstance(v, str):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    return {}
+            return {}
+
         # Prepare data for template
-        items_data = record.items if record.items else []
+        items_data = []
+        moduleB_data = _as_dict(getattr(record, 'moduleB_data', None))
+
+        # Expected shape: { itemHierarchies: [ { itemNumber, associatedBoxes:[{boxNo, description, qty, dimensions, weights}, ...] } ] }
+        if isinstance(moduleB_data.get('itemHierarchies'), list):
+            for h in moduleB_data.get('itemHierarchies'):
+                if not isinstance(h, dict):
+                    continue
+                item_no = str(h.get('itemNumber', '')).strip()
+                for b in h.get('associatedBoxes') or []:
+                    if not isinstance(b, dict):
+                        continue
+                    dims = b.get('dimensions') if isinstance(b.get('dimensions'), dict) else {}
+                    wts = b.get('weights') if isinstance(b.get('weights'), dict) else {}
+                    items_data.append({
+                        'itemNos': item_no,
+                        'boxNos': str(b.get('boxNo', '')).strip(),
+                        'description': str(b.get('description', '')).strip(),
+                        'qty': b.get('qty', ''),
+                        'l': dims.get('l', ''),
+                        'w': dims.get('w', ''),
+                        'h': dims.get('h', ''),
+                        'netWt': wts.get('net', ''),
+                        'grossWt': wts.get('gross', ''),
+                    })
+        else:
+            legacy_items = getattr(record, 'items', None)
+            if isinstance(legacy_items, list):
+                items_data = legacy_items
         
         # Calculate totals
         total_net_weight = 0
@@ -425,10 +491,6 @@ def zc_exporter_print(id):
         return render_template('ZC/start.html', **data)
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
-from flask import request, jsonify
-from datetime import datetime
-import json
-import os
 
 @app.route('/api/packaging-list/create', methods=['POST'])
 def create_packaging_list():
@@ -442,14 +504,125 @@ def create_packaging_list():
 
         a_type = data.get('moduleAType')
         a_data = data.get('moduleA', {})
+        b_type = data.get('moduleBType')
         b_data = data.get('moduleB', [])
+
+        def _normalize_a1_rows(raw_a1):
+            # Supports:
+            # - Flattened rows: [{boxNumbers, description, qty, l, w, h, netWt, grossWt}, ...]
+            # - Nested sections: [{material:{description}, boxes:[{boxNumber,...}, ...]}, ...]
+            out = []
+            if not isinstance(raw_a1, list):
+                return out
+
+            for entry in raw_a1:
+                if not isinstance(entry, dict):
+                    continue
+
+                is_nested = isinstance(entry.get('boxes'), list) and isinstance(entry.get('material'), dict)
+                if is_nested:
+                    desc = str((entry.get('material') or {}).get('description') or '')
+                    for box in entry.get('boxes') or []:
+                        if not isinstance(box, dict):
+                            continue
+                        out.append({
+                            'boxNumbers': box.get('boxNumber') or box.get('boxNumbers') or '',
+                            'description': desc,
+                            'qty': box.get('qty'),
+                            'l': box.get('l'),
+                            'w': box.get('w'),
+                            'h': box.get('h'),
+                            'netWt': box.get('netWt'),
+                            'grossWt': box.get('grossWt'),
+                        })
+                    continue
+
+                # Assume already-flat row (keep a stable shape for downstream)
+                out.append({
+                    'boxNumbers': entry.get('boxNumbers') or entry.get('boxNumber') or '',
+                    'description': entry.get('description') or '',
+                    'qty': entry.get('qty'),
+                    'l': entry.get('l'),
+                    'w': entry.get('w'),
+                    'h': entry.get('h'),
+                    'netWt': entry.get('netWt'),
+                    'grossWt': entry.get('grossWt'),
+                })
+
+            return out
+
+        def _parse_tokens(v):
+            raw = str(v or '').strip()
+            if not raw:
+                return []
+            out = []
+            for token in raw.split(','):
+                t = token.strip()
+                if not t:
+                    continue
+                if '-' in t:
+                    parts = [p.strip() for p in t.split('-', 1)]
+                    if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                        a = int(parts[0])
+                        b = int(parts[1])
+                        start = min(a, b)
+                        end = max(a, b)
+                        out.extend([str(n) for n in range(start, end + 1)])
+                        continue
+                out.append(t)
+            return out
+
+        def _safe_max(a, b):
+            try:
+                fa = float(a) if a not in (None, '') else None
+            except Exception:
+                fa = None
+            try:
+                fb = float(b) if b not in (None, '') else None
+            except Exception:
+                fb = None
+            if fa is None:
+                return fb
+            if fb is None:
+                return fa
+            return max(fa, fb)
+
+        def _aggregate_a2_materials(materials):
+            descs = []
+            qty_sum = 0.0
+            net_sum = 0.0
+            gross_sum = 0.0
+            l_max = None
+            w_max = None
+            h_max = None
+            for m in materials or []:
+                d = (m.get('description') or '').strip() if isinstance(m, dict) else ''
+                if d:
+                    descs.append(d)
+                if isinstance(m, dict):
+                    qty_sum += _sf(m.get('qty'))
+                    net_sum += _sf(m.get('netWt'))
+                    gross_sum += _sf(m.get('grossWt'))
+                    l_max = _safe_max(l_max, m.get('l'))
+                    w_max = _safe_max(w_max, m.get('w'))
+                    h_max = _safe_max(h_max, m.get('h'))
+            return {
+                'description': ' | '.join(descs) if descs else 'N/A',
+                'qty': qty_sum,
+                'l': l_max,
+                'w': w_max,
+                'h': h_max,
+                'netWt': net_sum,
+                'grossWt': gross_sum,
+                'materials': materials or []
+            }
 
         # --- 2. Calculate Weights (User Logic) ---
         total_net = 0.0
         total_gross = 0.0
 
         if a_type == 'A1': # List of multiple box objects
-            for r in a_data:
+            for r in _normalize_a1_rows(a_data):
                 total_net += _sf(r.get('netWt'))
                 total_gross += _sf(r.get('grossWt'))
         elif a_type == 'A2': # Nested Materials
@@ -466,33 +639,58 @@ def create_packaging_list():
         # Step A: Create a lookup for Box Details from Module A
         # (Handling the common A3 single-object case or A1 list case)
         box_lookup = {}
-        if a_type == 'A3':
-            b_no = str(a_data.get('boxNumber'))
-            box_lookup[b_no] = a_data
-        elif a_type == 'A1':
-            for b in a_data:
-                box_lookup[str(b.get('boxNumber'))] = b
+        if a_type == 'A3' and isinstance(a_data, dict):
+            for b_no in _parse_tokens(a_data.get('boxNumber')):
+                box_lookup[str(b_no)] = a_data
+        elif a_type == 'A1' and isinstance(a_data, list):
+            for r in _normalize_a1_rows(a_data):
+                for b_no in _parse_tokens(r.get('boxNumbers')):
+                    box_lookup[str(b_no)] = r
+        elif a_type == 'A2' and isinstance(a_data, dict):
+            for b_no in _parse_tokens(a_data.get('boxNumber')):
+                box_lookup[str(b_no)] = _aggregate_a2_materials(a_data.get('materials', []))
+
+        # Normalize Module B to: item_number -> set(box_numbers)
+        item_to_boxes = {}
+        if b_type == 'B1' and isinstance(b_data, list):
+            for r in b_data:
+                if not isinstance(r, dict):
+                    continue
+                for box_no in _parse_tokens(r.get('boxNumber')):
+                    for item_no in _parse_tokens(r.get('itemNumbers')):
+                        item_to_boxes.setdefault(str(item_no), set()).add(str(box_no))
+        elif b_type == 'B2' and isinstance(b_data, list):
+            for r in b_data:
+                if not isinstance(r, dict):
+                    continue
+                for item_no in _parse_tokens(r.get('itemNumber')):
+                    for box_no in _parse_tokens(r.get('boxNumbers')):
+                        item_to_boxes.setdefault(str(item_no), set()).add(str(box_no))
+        elif b_type == 'B3' and isinstance(b_data, dict):
+            for item_no in _parse_tokens(b_data.get('itemNumber')):
+                for box_no in _parse_tokens(b_data.get('boxNumber')):
+                    item_to_boxes.setdefault(str(item_no), set()).add(str(box_no))
+
+        # Determine box -> items, for Many-to-One detection
+        box_to_items = {}
+        for item_no, boxes in item_to_boxes.items():
+            for b_no in boxes:
+                box_to_items.setdefault(b_no, set()).add(item_no)
 
         # Step B: Build Item Hierarchies (The "Left Side" logic)
         item_hierarchies = []
-        for item in b_data:
-            item_no = item.get('itemNumber')
-            # Extract box numbers (handling "1,2,3" strings or lists)
-            box_refs = item.get('boxNumbers', "")
-            if isinstance(box_refs, str):
-                box_list = [b.strip() for b in box_refs.split(',') if b.strip()]
-            else:
-                box_list = [str(b) for b in box_refs]
+        def _sort_key(x):
+            return int(x) if str(x).isdigit() else str(x)
 
-            # Sort boxes for this item in ascending order
-            box_list.sort(key=lambda x: int(x) if x.isdigit() else x)
+        for item_no in sorted(item_to_boxes.keys(), key=_sort_key):
+            box_list = sorted(list(item_to_boxes.get(item_no, set())), key=_sort_key)
 
             # Determine Relationship Type
             rel_type = "One-to-One"
-            if len(box_list) > 1:
+            if any(len(box_to_items.get(b_no, set())) > 1 for b_no in box_list):
+                rel_type = "Many-to-One"
+            elif len(box_list) > 1:
                 rel_type = "One-to-Many"
-            # Note: Many-to-One is handled by the data naturally if multiple 
-            # item numbers reference the same box number in the loop.
 
             # Map details from the "Right Side" (Module A)
             associated_boxes = []
@@ -500,16 +698,16 @@ def create_packaging_list():
                 details = box_lookup.get(b_no, {})
                 associated_boxes.append({
                     "boxNo": b_no,
-                    "description": details.get('description', 'N/A'),
-                    "qty": details.get('qty', 0),
+                    "description": details.get('description', 'N/A') if isinstance(details, dict) else 'N/A',
+                    "qty": _sf(details.get('qty')) if isinstance(details, dict) else 0.0,
                     "dimensions": {
-                        "l": details.get('l'),
-                        "w": details.get('w'),
-                        "h": details.get('h')
+                        "l": details.get('l') if isinstance(details, dict) else None,
+                        "w": details.get('w') if isinstance(details, dict) else None,
+                        "h": details.get('h') if isinstance(details, dict) else None
                     },
                     "weights": {
-                        "net": details.get('netWt'),
-                        "gross": details.get('grossWt')
+                        "net": _sf(details.get('netWt')) if isinstance(details, dict) else 0.0,
+                        "gross": _sf(details.get('grossWt')) if isinstance(details, dict) else 0.0
                     }
                 })
 
@@ -571,6 +769,8 @@ def create_packaging_list():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
+
+
 @app.route('/api/packaging-list/<int:id>/update', methods=['PUT'])
 def update_packaging_list(id):
     try:
@@ -954,6 +1154,7 @@ if __name__ == '__main__':
     # Create database tables
     with app.app_context():
         db.create_all()
+        _ensure_packaging_list_schema()
     
   
 

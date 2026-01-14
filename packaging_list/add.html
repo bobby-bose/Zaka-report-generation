@@ -246,6 +246,21 @@
     </form>
   </div>
 
+  <div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="validationModalTitle">Validation Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="validationModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 
   <script>
@@ -259,7 +274,14 @@
       moduleBType: 'B1',
       moduleA: {
         A1: [
-          { boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' },
+          {
+            material: {
+              description: '',
+            },
+            boxes: [
+              { boxNumber: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' },
+            ],
+          },
         ],
         A2: { boxNumber: '', materials: [ { description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' } ] },
         A3: { boxNumber: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' },
@@ -275,81 +297,144 @@
       const t = state.moduleAType;
 
       if (t === 'A1') {
+        const a1 = state.moduleA.A1;
         moduleAContainer.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="fw-semibold">Many Boxes - One Material</div>
-            <button type="button" class="btn btn-light btn-add-item px-4" id="addA1RowBtn">+ Add Row</button>
+            <button type="button" class="btn btn-light btn-add-item px-4" id="addA1SectionBtn">+ Add Material Section</button>
           </div>
-          <div class="row g-3" id="a1Rows"></div>
+          <div class="row g-3" id="a1Sections"></div>
         `;
 
-        const rowsEl = moduleAContainer.querySelector('#a1Rows');
-        state.moduleA.A1.forEach((r, idx) => {
+        const sectionsEl = moduleAContainer.querySelector('#a1Sections');
+        a1.forEach((sec, sIdx) => {
           const col = document.createElement('div');
           col.className = 'col-12';
           col.innerHTML = `
             <div class="table-group">
-              <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-2">
-                  <label class="form-label fw-semibold">Box Numbers</label>
-                  <input type="text" class="form-control border-success" data-k="boxNumbers" data-i="${idx}" value="${r.boxNumbers}">
-                </div>
-                <div class="col-12 col-md-4">
-                  <label class="form-label fw-semibold">Material &amp; Packaging Description</label>
-                  <textarea class="form-control border-success" rows="2" data-k="description" data-i="${idx}">${r.description}</textarea>
-                </div>
-                <div class="col-6 col-md-1">
-                  <label class="form-label fw-semibold">Qty</label>
-                  <input type="text" class="form-control border-success" data-k="qty" data-i="${idx}" value="${r.qty}">
-                </div>
-                <div class="col-4 col-md-1">
-                  <label class="form-label fw-semibold">L</label>
-                  <input type="text" class="form-control border-success" data-k="l" data-i="${idx}" value="${r.l}">
-                </div>
-                <div class="col-4 col-md-1">
-                  <label class="form-label fw-semibold">W</label>
-                  <input type="text" class="form-control border-success" data-k="w" data-i="${idx}" value="${r.w}">
-                </div>
-                <div class="col-4 col-md-1">
-                  <label class="form-label fw-semibold">H</label>
-                  <input type="text" class="form-control border-success" data-k="h" data-i="${idx}" value="${r.h}">
-                </div>
-                <div class="col-6 col-md-1">
-                  <label class="form-label fw-semibold">Net</label>
-                  <input type="text" class="form-control border-success" data-k="netWt" data-i="${idx}" value="${r.netWt}">
-                </div>
-                <div class="col-6 col-md-1">
-                  <label class="form-label fw-semibold">Gross</label>
-                  <input type="text" class="form-control border-success" data-k="grossWt" data-i="${idx}" value="${r.grossWt}">
-                </div>
-                <div class="col-12 text-end mt-2">
-                  <button type="button" class="btn btn-outline-danger" data-action="removeA1" data-index="${idx}">Remove Row</button>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-semibold">Material &amp; Packaging Description</div>
+                <div>
+                  <button type="button" class="btn btn-light btn-add-item px-4" data-action="addA1Box" data-s="${sIdx}">+ Add Box Row</button>
+                  <button type="button" class="btn btn-outline-danger ms-2" data-action="removeA1Section" data-s="${sIdx}">Remove Material Section</button>
                 </div>
               </div>
+              <div class="row g-2">
+                <div class="col-12">
+                  <textarea class="form-control border-success" rows="2" data-k="materialDesc" data-s="${sIdx}">${sec.material.description}</textarea>
+                </div>
+              </div>
+
+              <div class="fw-semibold mt-3 mb-2">Box-wise Quantity, Dimensions &amp; Weights</div>
+              <div class="row g-3" id="a1Boxes_${sIdx}"></div>
             </div>
           `;
-          rowsEl.appendChild(col);
-        });
+          sectionsEl.appendChild(col);
 
-        moduleAContainer.querySelector('#addA1RowBtn').addEventListener('click', () => {
-          state.moduleA.A1.push({ boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
-          renderModuleA();
-        });
-
-        moduleAContainer.querySelectorAll('input[data-k], textarea[data-k]').forEach((el) => {
-          el.addEventListener('input', (e) => {
-            const i = Number(e.target.getAttribute('data-i'));
-            const k = e.target.getAttribute('data-k');
-            if (!Number.isNaN(i) && k) state.moduleA.A1[i][k] = e.target.value;
+          const boxesEl = col.querySelector(`#a1Boxes_${sIdx}`);
+          (sec.boxes || []).forEach((r, idx) => {
+            const boxCol = document.createElement('div');
+            boxCol.className = 'col-12';
+            boxCol.innerHTML = `
+              <div>
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-2">
+                    <label class="form-label fw-semibold">Box Number</label>
+                    <input type="text" class="form-control border-success" data-k="boxNumber" data-s="${sIdx}" data-i="${idx}" value="${r.boxNumber}">
+                  </div>
+                  <div class="col-6 col-md-1">
+                    <label class="form-label fw-semibold">Qty</label>
+                    <input type="text" class="form-control border-success" data-k="qty" data-s="${sIdx}" data-i="${idx}" value="${r.qty}">
+                  </div>
+                  <div class="col-4 col-md-1">
+                    <label class="form-label fw-semibold">L</label>
+                    <input type="text" class="form-control border-success" data-k="l" data-s="${sIdx}" data-i="${idx}" value="${r.l}">
+                  </div>
+                  <div class="col-4 col-md-1">
+                    <label class="form-label fw-semibold">W</label>
+                    <input type="text" class="form-control border-success" data-k="w" data-s="${sIdx}" data-i="${idx}" value="${r.w}">
+                  </div>
+                  <div class="col-4 col-md-1">
+                    <label class="form-label fw-semibold">H</label>
+                    <input type="text" class="form-control border-success" data-k="h" data-s="${sIdx}" data-i="${idx}" value="${r.h}">
+                  </div>
+                  <div class="col-6 col-md-1">
+                    <label class="form-label fw-semibold">Net</label>
+                    <input type="text" class="form-control border-success" data-k="netWt" data-s="${sIdx}" data-i="${idx}" value="${r.netWt}">
+                  </div>
+                  <div class="col-6 col-md-1">
+                    <label class="form-label fw-semibold">Gross</label>
+                    <input type="text" class="form-control border-success" data-k="grossWt" data-s="${sIdx}" data-i="${idx}" value="${r.grossWt}">
+                  </div>
+                  <div class="col-12 text-end mt-2">
+                    <button type="button" class="btn btn-outline-danger" data-action="removeA1Box" data-s="${sIdx}" data-index="${idx}">Remove Row</button>
+                  </div>
+                </div>
+              </div>
+            `;
+            boxesEl.appendChild(boxCol);
           });
         });
 
-        moduleAContainer.querySelectorAll('button[data-action="removeA1"]').forEach((btn) => {
+        moduleAContainer.querySelector('#addA1SectionBtn').addEventListener('click', () => {
+          state.moduleA.A1.push({
+            material: { description: '' },
+            boxes: [ { boxNumber: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' } ],
+          });
+          renderModuleA();
+        });
+
+        moduleAContainer.querySelectorAll('textarea[data-k="materialDesc"]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const s = Number(e.target.getAttribute('data-s'));
+            if (!Number.isNaN(s)) state.moduleA.A1[s].material.description = e.target.value;
+          });
+        });
+
+        moduleAContainer.querySelectorAll('input[data-k][data-s][data-i]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const s = Number(e.target.getAttribute('data-s'));
+            const i = Number(e.target.getAttribute('data-i'));
+            const k = e.target.getAttribute('data-k');
+            if (!Number.isNaN(s) && !Number.isNaN(i) && k) state.moduleA.A1[s].boxes[i][k] = e.target.value;
+          });
+        });
+
+        moduleAContainer.querySelectorAll('button[data-action="addA1Box"]').forEach((btn) => {
           btn.addEventListener('click', (e) => {
+            const s = Number(e.target.getAttribute('data-s'));
+            if (!Number.isNaN(s)) {
+              state.moduleA.A1[s].boxes.push({ boxNumber: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+              renderModuleA();
+            }
+          });
+        });
+
+        moduleAContainer.querySelectorAll('button[data-action="removeA1Box"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const s = Number(e.target.getAttribute('data-s'));
             const i = Number(e.target.getAttribute('data-index'));
-            if (!Number.isNaN(i)) {
-              state.moduleA.A1.splice(i, 1);
-              if (state.moduleA.A1.length === 0) state.moduleA.A1.push({ boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+            if (!Number.isNaN(s) && !Number.isNaN(i)) {
+              state.moduleA.A1[s].boxes.splice(i, 1);
+              if (state.moduleA.A1[s].boxes.length === 0) {
+                state.moduleA.A1[s].boxes.push({ boxNumber: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+              }
+              renderModuleA();
+            }
+          });
+        });
+
+        moduleAContainer.querySelectorAll('button[data-action="removeA1Section"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const s = Number(e.target.getAttribute('data-s'));
+            if (!Number.isNaN(s)) {
+              state.moduleA.A1.splice(s, 1);
+              if (state.moduleA.A1.length === 0) {
+                state.moduleA.A1.push({
+                  material: { description: '' },
+                  boxes: [ { boxNumber: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' } ],
+                });
+              }
               renderModuleA();
             }
           });
@@ -646,6 +731,93 @@
       }
     }
 
+    function showValidationModal(title, htmlBody) {
+      const titleEl = document.getElementById('validationModalTitle');
+      const bodyEl = document.getElementById('validationModalBody');
+      if (titleEl) titleEl.textContent = title || 'Validation Error';
+      if (bodyEl) bodyEl.innerHTML = htmlBody || '';
+
+      const el = document.getElementById('validationModal');
+      if (!el) {
+        alert((title || 'Validation Error') + "\n" + (bodyEl ? bodyEl.textContent : ''));
+        return;
+      }
+      const modal = bootstrap.Modal.getOrCreateInstance(el);
+      modal.show();
+    }
+
+    function parseNumberTokens(input) {
+      const raw = String(input ?? '').trim();
+      if (!raw) return [];
+
+      const out = [];
+      for (const token of raw.split(',')) {
+        const t = token.trim();
+        if (!t) continue;
+        out.push(t);
+      }
+      return out;
+    }
+
+    function collectModuleABoxNumbers() {
+      const set = new Set();
+      if (state.moduleAType === 'A1') {
+        for (const sec of state.moduleA.A1) {
+          for (const r of (sec.boxes || [])) {
+            for (const b of parseNumberTokens(r.boxNumber)) set.add(String(b).trim());
+          }
+        }
+      } else if (state.moduleAType === 'A2') {
+        for (const b of parseNumberTokens(state.moduleA.A2.boxNumber)) set.add(String(b).trim());
+      } else if (state.moduleAType === 'A3') {
+        for (const b of parseNumberTokens(state.moduleA.A3.boxNumber)) set.add(String(b).trim());
+      }
+      return set;
+    }
+
+    function collectModuleBBoxNumbers() {
+      const set = new Set();
+      if (state.moduleBType === 'B1') {
+        for (const r of state.moduleB.B1) {
+          for (const b of parseNumberTokens(r.boxNumber)) set.add(String(b).trim());
+        }
+      } else if (state.moduleBType === 'B2') {
+        for (const r of state.moduleB.B2) {
+          for (const b of parseNumberTokens(r.boxNumbers)) set.add(String(b).trim());
+        }
+      } else if (state.moduleBType === 'B3') {
+        for (const b of parseNumberTokens(state.moduleB.B3.boxNumber)) set.add(String(b).trim());
+      }
+      return set;
+    }
+
+    function validateModuleBBoxExistInA() {
+      const aBoxes = collectModuleABoxNumbers();
+      const bBoxes = collectModuleBBoxNumbers();
+
+      const missing = [];
+      for (const b of bBoxes) {
+        if (b && !aBoxes.has(b)) missing.push(b);
+      }
+      missing.sort((x, y) => {
+        const xi = Number(x);
+        const yi = Number(y);
+        if (!Number.isNaN(xi) && !Number.isNaN(yi)) return xi - yi;
+        return String(x).localeCompare(String(y));
+      });
+
+      if (missing.length > 0) {
+        showValidationModal(
+          'Missing Box Numbers',
+          `<div class="fw-semibold mb-2">Module B references Box Number(s) that are not available / not inserted in Module A.</div>
+           <div class="mb-2">Please add these box numbers in Module A, then submit again.</div>
+           <div><b>Missing:</b> ${missing.join(', ')}</div>`
+        );
+        return false;
+      }
+      return true;
+    }
+
     packingTypeSelect.addEventListener('change', (e) => {
       state.moduleAType = e.target.value;
       renderModuleA();
@@ -660,6 +832,21 @@
       e.preventDefault();
 
       const formData = new FormData(e.target);
+      const moduleAForPayload =
+        state.moduleAType === 'A1'
+          ? state.moduleA.A1.flatMap((sec) =>
+              (sec.boxes || []).map((b) => ({
+                boxNumbers: b.boxNumber,
+                description: (sec.material && sec.material.description) || '',
+                qty: b.qty,
+                l: b.l,
+                w: b.w,
+                h: b.h,
+                netWt: b.netWt,
+                grossWt: b.grossWt,
+              }))
+            )
+          : state.moduleA[state.moduleAType];
       const payload = {
         consigneeAddress: formData.get('consigneeAddress'),
         deliveryAddress: formData.get('deliveryAddress'),
@@ -673,7 +860,7 @@
         taxNumber: formData.get('taxNumber'),
         currency: document.getElementById('currencySelect').value,
         moduleAType: state.moduleAType,
-        moduleA: state.moduleA[state.moduleAType],
+        moduleA: moduleAForPayload,
         moduleBType: state.moduleBType,
         moduleB: state.moduleB[state.moduleBType],
       };
@@ -681,10 +868,20 @@
       const isEmpty = (v) => !String(v ?? '').trim();
 
       if (state.moduleAType === 'A1') {
-        for (const r of state.moduleA.A1) {
-          if (isEmpty(r.boxNumbers) || isEmpty(r.description)) {
-            alert('Module A: Box Numbers and Description cannot be empty.');
+        for (const sec of state.moduleA.A1) {
+          if (isEmpty(sec?.material?.description)) {
+            alert('Module A: Material & Packaging Description cannot be empty.');
             return;
+          }
+          if (!sec.boxes || sec.boxes.length === 0) {
+            alert('Module A: At least one box row must exist under each material section.');
+            return;
+          }
+          for (const r of sec.boxes) {
+            if (isEmpty(r.boxNumber)) {
+              alert('Module A: Box Number cannot be empty.');
+              return;
+            }
           }
         }
       }
@@ -736,8 +933,29 @@
         }
       }
 
-      console.log('Packing List UI Payload (UI-only):', payload);
-      alert('Captured UI data (check console).');
+      if (!validateModuleBBoxExistInA()) return;
+
+      fetch('/api/packaging-list/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(async (res) => {
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || !json.success) {
+            const msg = (json && (json.message || json.error)) || 'Failed to save packing list.';
+            showValidationModal('Save Failed', `<div>${String(msg)}</div>`);
+            return;
+          }
+          if (json.id) {
+            window.location.href = `/packaging_list/print/${json.id}`;
+            return;
+          }
+          showValidationModal('Saved', '<div>Packing list saved successfully.</div>');
+        })
+        .catch((err) => {
+          showValidationModal('Save Failed', `<div>${String(err || 'Network error')}</div>`);
+        });
     });
 
     renderModuleA();

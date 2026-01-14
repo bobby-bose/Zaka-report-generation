@@ -1,0 +1,91 @@
+{
+    "itemHierarchies": [
+        {
+            "itemNumber": "1",
+            "relationship": "One-to-Many",
+            "associatedBoxes": [
+                {
+                    "boxNo": "1",
+                    "description": "GST Packaging",
+                    "qty": 5.0,
+                    "dimensions": {
+                        "l": "5",
+                        "w": "5",
+                        "h": "5"
+                    },
+                    "weights": {
+                        "net": 5.0,
+                        "gross": 5.0
+                    }
+                },
+                {
+                    "boxNo": "2",
+                    "description": "GST Packaging",
+                    "qty": 7.0,
+                    "dimensions": {
+                        "l": "8",
+                        "w": "8",
+                        "h": "8"
+                    },
+                    "weights": {
+                        "net": 8.0,
+                        "gross": 8.0
+                    }
+                },
+                {
+                    "boxNo": "3",
+                    "description": "GST Packaging",
+                    "qty": 56.0,
+                    "dimensions": {
+                        "l": "7",
+                        "w": "7",
+                        "h": "7"
+                    },
+                    "weights": {
+                        "net": 7.0,
+                        "gross": 7.0
+                    }
+                }
+            ]
+        },
+        {
+            "itemNumber": "10",
+            "relationship": "One-to-Many",
+            "associatedBoxes": [
+                {
+                    "boxNo": "4",
+                    "description": "MM",
+                    "qty": 0.0,
+                    "dimensions": {
+                        "l": "o",
+                        "w": "o",
+                        "h": "o"
+                    },
+                    "weights": {
+                        "net": 0.0,
+                        "gross": 0.0
+                    }
+                },
+                {
+                    "boxNo": "5",
+                    "description": "MM",
+                    "qty": 0.0,
+                    "dimensions": {
+                        "l": "o",
+                        "w": "o",
+                        "h": "o"
+                    },
+                    "weights": {
+                        "net": 0.0,
+                        "gross": 0.0
+                    }
+                }
+            ]
+        }
+    ],
+    "summary": {
+        "total_net": 20.0,
+        "total_gross": 20.0,
+        "currency": "USD"
+    }
+}

@@ -231,8 +231,8 @@
         <thead>
             <tr>
                 <th class="item-no">PO/Item No.</th>
-                <th class="material-desc">Material & Packing Description</th>
                 <th class="box-no">Box No.</th>
+                <th class="material-desc">Material & Packing Description</th>
                 <th class="qty">Qty</th>
                 <th class="dimension">Dimension</th>
                 <th class="net-weight">Net Weight (Kg)</th>
@@ -245,15 +245,17 @@
                 <tr>
                     {% if loop.first %}
                     <td class="item-no text-center" rowspan="{{ group.rowspan }}" style="vertical-align: middle;">{{ group.itemNos }}</td>
-                    {% if group.description_merged %}
-                    <td class="material-desc" rowspan="{{ group.description_rowspan }}" style="vertical-align: middle;">{{ group.description }}</td>
-                    {% endif %}
                     {% endif %}
 
-                    {% if not group.description_merged %}
+                    <td class="box-no text-center">{{ row.boxNos }}</td>
+
+                    {% if group.description_merged %}
+                    {% if loop.first %}
+                    <td class="material-desc" rowspan="{{ group.description_rowspan }}" style="vertical-align: middle;">{{ group.description }}</td>
+                    {% endif %}
+                    {% else %}
                     <td class="material-desc">{{ row.description }}</td>
                     {% endif %}
-                    <td class="box-no text-center">{{ row.boxNos }}</td>
                     <td class="qty text-center">{{ row.qty }}</td>
                     <td class="dimension text-center">{{ row.l }} (L) x {{ row.w }} (W) x {{ row.h }} (H) cm</td>
                     <td class="net-weight text-center">{{ row.netWt }}</td>
