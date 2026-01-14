@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +5,11 @@
   <title>Packing List - Add</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Bootstrap -->
   <link
     href="/static/vendor/bootstrap/bootstrap.min.css"
     rel="stylesheet"
   />
 
-  <!-- Minimal custom CSS (only where Bootstrap can’t help) -->
   <style>
     body {
       background-color: #f7f7f7;
@@ -63,14 +60,26 @@
     .box-row .form-control {
       min-width: 70px;
     }
+
+    .table-group {
+      border: 2px solid red;
+      border-radius: 8px;
+      background: #fff;
+      padding: 1rem;
+    }
+
+    .desc-input {
+      min-height: 42px;
+      resize: vertical;
+    }
   </style>
 </head>
 <body>
-  <!-- Logo Header -->
   <div style="text-align: center; padding: 2vh 1vw; background-color: #f8f9fa; border-bottom: 3px solid #d90000;">
       <img src="/static/logo.jpg" alt="ZAKA Controls & Devices" style="height: 19vh; width: auto; max-width: 117vw; object-fit: contain;">
-  </div>  <div class="container-fluid py-4">
-    <!-- Header -->
+  </div>
+  
+  <div class="container-fluid py-4">
     <div class="row mb-4 text-center">
       <div class="col-12">
         <h2 class="fw-bold mb-0">
@@ -91,7 +100,6 @@
           <input type="hidden" name="currency" id="currencyHidden" value="USD">
         </div>
       </div>
-      <!-- Addresses -->
       <div class="card-section">
         <div class="row g-3">
           <div class="col-md-6">
@@ -193,395 +201,547 @@
         </div>
       </div>
 
-      <!-- Items -->
       <div class="card-section">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Items</h5>
-          <button
-            type="button"
-            class="btn btn-light btn-add-item px-4"
-            id="addItemBtn"
-          >
-            + Add Item
-          </button>
+          <h5 class="mb-0">MODULE A: BOX  PACKING DETAILS</h5>
         </div>
 
-        <div class="row g-3" id="itemsContainer">
-          <!-- Item cards injected here -->
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold">Packing Type</label>
+            <select class="form-select" id="packingTypeSelect">
+              <option value="A1" selected>Many Boxes  One Material</option>
+              <option value="A2">One Box  Many Materials</option>
+              <option value="A3">One Box  One Material</option>
+            </select>
+          </div>
         </div>
+
+        <div class="mt-3" id="moduleAContainer"></div>
       </div>
 
-      <!-- Submit -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">MODULE B: ITEM NUMBERS  BOX MAPPING</h5>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label fw-semibold">Mapping Type</label>
+            <select class="form-select" id="mappingTypeSelect">
+              <option value="B1" selected>Many Item Numbers  One Box</option>
+              <option value="B2">One Item Number  Many Boxes</option>
+              <option value="B3">One Item Number  One Box</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-3" id="moduleBContainer"></div>
+      </div>
+
       <div class="text-end mt-3">
-        <button type="submit" class="btn btn-primary px-5 fw-semibold" style="background-color: #28a745; border-color: #28a745; color: white; font-weight: bold;">✓ Submit</button>
-        <button type="button" class="btn px-5 fw-semibold ms-2" style="background-color: #6c757d; border-color: #6c757d; color: white; font-weight: bold;" onclick="window.history.back()">↩ Cancel</button>
+        <button type="submit" class="btn btn-primary px-5 fw-semibold" style="background-color: #28a745; border-color: #28a745; color: white; font-weight: bold;"> Submit</button>
+        <button type="button" class="btn px-5 fw-semibold ms-2" style="background-color: #6c757d; border-color: #6c757d; color: white; font-weight: bold;" onclick="window.history.back()"> Cancel</button>
       </div>
     </form>
   </div>
 
-  <!-- Boxes Modal -->
-  <div
-    class="modal fade"
-    id="boxesModal"
-    tabindex="-1"
-    aria-labelledby="boxesModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="boxesModalLabel">Add Boxes</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <p class="small">
-            Add boxes for this item. Box numbers are auto-generated and unique
-            across all items.
-          </p>
-          <div id="boxesRows"></div>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-outline-danger me-auto"
-            id="addBoxRowBtn"
-          >
-            + Add Another Box
-          </button>
-          <button
-            type="button"
-            class="btn btn-success"
-            id="saveBoxesBtn"
-            data-bs-dismiss="modal"
-          >
-            Save Boxes
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap JS -->
   <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 
-  <!-- Page JS -->
   <script>
-    // Data model
-    let items = [];
-    let currentItemIndex = null;
+    const moduleAContainer = document.getElementById('moduleAContainer');
+    const moduleBContainer = document.getElementById('moduleBContainer');
+    const packingTypeSelect = document.getElementById('packingTypeSelect');
+    const mappingTypeSelect = document.getElementById('mappingTypeSelect');
 
-    const itemsContainer = document.getElementById("itemsContainer");
-    const boxesRows = document.getElementById("boxesRows");
-    const boxesModal = new bootstrap.Modal(
-      document.getElementById("boxesModal")
-    );
+    const state = {
+      moduleAType: 'A1',
+      moduleBType: 'B1',
+      moduleA: {
+        A1: [
+          { boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' },
+        ],
+        A2: { boxNumber: '', materials: [ { description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' } ] },
+        A3: { boxNumber: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' },
+      },
+      moduleB: {
+        B1: [ { boxNumber: '', itemNumbers: '' } ],
+        B2: [ { itemNumber: '', boxNumbers: '' } ],
+        B3: { itemNumber: '', boxNumber: '' },
+      },
+    };
 
-    document
-      .getElementById("addItemBtn")
-      .addEventListener("click", () => addItem());
+    function renderModuleA() {
+      const t = state.moduleAType;
 
-    document
-      .getElementById("addBoxRowBtn")
-      .addEventListener("click", () => addBoxRow());
+      if (t === 'A1') {
+        moduleAContainer.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-semibold">Many Boxes - One Material</div>
+            <button type="button" class="btn btn-light btn-add-item px-4" id="addA1RowBtn">+ Add Row</button>
+          </div>
+          <div class="row g-3" id="a1Rows"></div>
+        `;
 
-    document
-      .getElementById("saveBoxesBtn")
-      .addEventListener("click", () => saveBoxes());
+        const rowsEl = moduleAContainer.querySelector('#a1Rows');
+        state.moduleA.A1.forEach((r, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          col.innerHTML = `
+            <div class="table-group">
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-2">
+                  <label class="form-label fw-semibold">Box Numbers</label>
+                  <input type="text" class="form-control border-success" data-k="boxNumbers" data-i="${idx}" value="${r.boxNumbers}">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label fw-semibold">Material &amp; Packaging Description</label>
+                  <textarea class="form-control border-success" rows="2" data-k="description" data-i="${idx}">${r.description}</textarea>
+                </div>
+                <div class="col-6 col-md-1">
+                  <label class="form-label fw-semibold">Qty</label>
+                  <input type="text" class="form-control border-success" data-k="qty" data-i="${idx}" value="${r.qty}">
+                </div>
+                <div class="col-4 col-md-1">
+                  <label class="form-label fw-semibold">L</label>
+                  <input type="text" class="form-control border-success" data-k="l" data-i="${idx}" value="${r.l}">
+                </div>
+                <div class="col-4 col-md-1">
+                  <label class="form-label fw-semibold">W</label>
+                  <input type="text" class="form-control border-success" data-k="w" data-i="${idx}" value="${r.w}">
+                </div>
+                <div class="col-4 col-md-1">
+                  <label class="form-label fw-semibold">H</label>
+                  <input type="text" class="form-control border-success" data-k="h" data-i="${idx}" value="${r.h}">
+                </div>
+                <div class="col-6 col-md-1">
+                  <label class="form-label fw-semibold">Net</label>
+                  <input type="text" class="form-control border-success" data-k="netWt" data-i="${idx}" value="${r.netWt}">
+                </div>
+                <div class="col-6 col-md-1">
+                  <label class="form-label fw-semibold">Gross</label>
+                  <input type="text" class="form-control border-success" data-k="grossWt" data-i="${idx}" value="${r.grossWt}">
+                </div>
+                <div class="col-12 text-end mt-2">
+                  <button type="button" class="btn btn-outline-danger" data-action="removeA1" data-index="${idx}">Remove Row</button>
+                </div>
+              </div>
+            </div>
+          `;
+          rowsEl.appendChild(col);
+        });
 
-    document
-      .getElementById("packingForm")
-      .addEventListener("submit", (e) => {
-        e.preventDefault();
-        
-        // Validate that all items have at least one box
-        for (let item of items) {
-          if (item.boxes.length === 0) {
-            alert('All items must have at least one box. Please add boxes to all items.');
+        moduleAContainer.querySelector('#addA1RowBtn').addEventListener('click', () => {
+          state.moduleA.A1.push({ boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+          renderModuleA();
+        });
+
+        moduleAContainer.querySelectorAll('input[data-k], textarea[data-k]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const i = Number(e.target.getAttribute('data-i'));
+            const k = e.target.getAttribute('data-k');
+            if (!Number.isNaN(i) && k) state.moduleA.A1[i][k] = e.target.value;
+          });
+        });
+
+        moduleAContainer.querySelectorAll('button[data-action="removeA1"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const i = Number(e.target.getAttribute('data-index'));
+            if (!Number.isNaN(i)) {
+              state.moduleA.A1.splice(i, 1);
+              if (state.moduleA.A1.length === 0) state.moduleA.A1.push({ boxNumbers: '', description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+              renderModuleA();
+            }
+          });
+        });
+
+        return;
+      }
+
+      if (t === 'A2') {
+        const a2 = state.moduleA.A2;
+        moduleAContainer.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-semibold">One Box - Many Materials</div>
+            <button type="button" class="btn btn-light btn-add-item px-4" id="addA2MaterialBtn">+ Add Material Row</button>
+          </div>
+          <div class="table-group">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">Box Number</label>
+                <input type="text" class="form-control border-success" id="a2BoxNumber" value="${a2.boxNumber}">
+              </div>
+            </div>
+            <div class="row g-3 mt-2" id="a2Materials"></div>
+          </div>
+        `;
+
+        moduleAContainer.querySelector('#a2BoxNumber').addEventListener('input', (e) => (state.moduleA.A2.boxNumber = e.target.value));
+
+        const materialsEl = moduleAContainer.querySelector('#a2Materials');
+        a2.materials.forEach((m, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          col.innerHTML = `
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Material &amp; Packaging Description</label>
+                <textarea class="form-control border-success" rows="2" data-i="${idx}" data-k="description">${m.description}</textarea>
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Qty</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="qty" value="${m.qty}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">L</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="l" value="${m.l}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">W</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="w" value="${m.w}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">H</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="h" value="${m.h}">
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Net</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="netWt" value="${m.netWt}">
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Gross</label>
+                <input type="text" class="form-control border-success" data-i="${idx}" data-k="grossWt" value="${m.grossWt}">
+              </div>
+              <div class="col-12 text-end mt-2">
+                <button type="button" class="btn btn-outline-danger" data-action="removeA2" data-index="${idx}">Remove Material</button>
+              </div>
+            </div>
+          `;
+          materialsEl.appendChild(col);
+        });
+
+        moduleAContainer.querySelector('#addA2MaterialBtn').addEventListener('click', () => {
+          state.moduleA.A2.materials.push({ description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+          renderModuleA();
+        });
+
+        moduleAContainer.querySelectorAll('input[data-k], textarea[data-k]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const i = Number(e.target.getAttribute('data-i'));
+            const k = e.target.getAttribute('data-k');
+            if (!Number.isNaN(i) && k) state.moduleA.A2.materials[i][k] = e.target.value;
+          });
+        });
+
+        moduleAContainer.querySelectorAll('button[data-action="removeA2"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const i = Number(e.target.getAttribute('data-index'));
+            if (!Number.isNaN(i)) {
+              state.moduleA.A2.materials.splice(i, 1);
+              if (state.moduleA.A2.materials.length === 0) state.moduleA.A2.materials.push({ description: '', qty: '', l: '', w: '', h: '', netWt: '', grossWt: '' });
+              renderModuleA();
+            }
+          });
+        });
+
+        return;
+      }
+
+      if (t === 'A3') {
+        const a3 = state.moduleA.A3;
+        moduleAContainer.innerHTML = `
+          <div class="fw-semibold mb-2">One Box - One Material</div>
+          <div class="table-group">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">Box Number</label>
+                <input type="text" class="form-control border-success" id="a3Box" value="${a3.boxNumber}">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Material &amp; Packaging Description</label>
+                <textarea class="form-control border-success" rows="2" id="a3Desc">${a3.description}</textarea>
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Qty</label>
+                <input type="text" class="form-control border-success" id="a3Qty" value="${a3.qty}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">L</label>
+                <input type="text" class="form-control border-success" id="a3L" value="${a3.l}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">W</label>
+                <input type="text" class="form-control border-success" id="a3W" value="${a3.w}">
+              </div>
+              <div class="col-4 col-md-1">
+                <label class="form-label fw-semibold">H</label>
+                <input type="text" class="form-control border-success" id="a3H" value="${a3.h}">
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Net</label>
+                <input type="text" class="form-control border-success" id="a3Net" value="${a3.netWt}">
+              </div>
+              <div class="col-6 col-md-1">
+                <label class="form-label fw-semibold">Gross</label>
+                <input type="text" class="form-control border-success" id="a3Gross" value="${a3.grossWt}">
+              </div>
+            </div>
+          </div>
+        `;
+
+        moduleAContainer.querySelector('#a3Box').addEventListener('input', (e) => (state.moduleA.A3.boxNumber = e.target.value));
+        moduleAContainer.querySelector('#a3Desc').addEventListener('input', (e) => (state.moduleA.A3.description = e.target.value));
+        moduleAContainer.querySelector('#a3Qty').addEventListener('input', (e) => (state.moduleA.A3.qty = e.target.value));
+        moduleAContainer.querySelector('#a3L').addEventListener('input', (e) => (state.moduleA.A3.l = e.target.value));
+        moduleAContainer.querySelector('#a3W').addEventListener('input', (e) => (state.moduleA.A3.w = e.target.value));
+        moduleAContainer.querySelector('#a3H').addEventListener('input', (e) => (state.moduleA.A3.h = e.target.value));
+        moduleAContainer.querySelector('#a3Net').addEventListener('input', (e) => (state.moduleA.A3.netWt = e.target.value));
+        moduleAContainer.querySelector('#a3Gross').addEventListener('input', (e) => (state.moduleA.A3.grossWt = e.target.value));
+      }
+    }
+
+    function renderModuleB() {
+      const t = state.moduleBType;
+
+      if (t === 'B1') {
+        moduleBContainer.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-semibold">Many Item Numbers - One Box</div>
+            <button type="button" class="btn btn-light btn-add-item px-4" id="addB1RowBtn">+ Add Row</button>
+          </div>
+          <div class="row g-3" id="b1Rows"></div>
+        `;
+
+        const rowsEl = moduleBContainer.querySelector('#b1Rows');
+        state.moduleB.B1.forEach((r, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          col.innerHTML = `
+            <div class="table-group">
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-2">
+                  <label class="form-label fw-semibold">Box Number</label>
+                  <input type="text" class="form-control border-success" data-i="${idx}" data-k="boxNumber" value="${r.boxNumber}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Item Numbers</label>
+                  <input type="text" class="form-control border-success" data-i="${idx}" data-k="itemNumbers" value="${r.itemNumbers}">
+                </div>
+                <div class="col-12 col-md-4 text-end">
+                  <button type="button" class="btn btn-outline-danger" data-action="removeB1" data-index="${idx}">Remove Row</button>
+                </div>
+              </div>
+            </div>
+          `;
+          rowsEl.appendChild(col);
+        });
+
+        moduleBContainer.querySelector('#addB1RowBtn').addEventListener('click', () => {
+          state.moduleB.B1.push({ boxNumber: '', itemNumbers: '' });
+          renderModuleB();
+        });
+
+        moduleBContainer.querySelectorAll('input[data-k]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const i = Number(e.target.getAttribute('data-i'));
+            const k = e.target.getAttribute('data-k');
+            if (!Number.isNaN(i) && k) state.moduleB.B1[i][k] = e.target.value;
+          });
+        });
+
+        moduleBContainer.querySelectorAll('button[data-action="removeB1"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const i = Number(e.target.getAttribute('data-index'));
+            if (!Number.isNaN(i)) {
+              state.moduleB.B1.splice(i, 1);
+              if (state.moduleB.B1.length === 0) state.moduleB.B1.push({ boxNumber: '', itemNumbers: '' });
+              renderModuleB();
+            }
+          });
+        });
+
+        return;
+      }
+
+      if (t === 'B2') {
+        moduleBContainer.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-semibold">One Item Number - Many Boxes</div>
+            <button type="button" class="btn btn-light btn-add-item px-4" id="addB2RowBtn">+ Add Row</button>
+          </div>
+          <div class="row g-3" id="b2Rows"></div>
+        `;
+
+        const rowsEl = moduleBContainer.querySelector('#b2Rows');
+        state.moduleB.B2.forEach((r, idx) => {
+          const col = document.createElement('div');
+          col.className = 'col-12';
+          col.innerHTML = `
+            <div class="table-group">
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-2">
+                  <label class="form-label fw-semibold">Item Number</label>
+                  <input type="text" class="form-control border-success" data-i="${idx}" data-k="itemNumber" value="${r.itemNumber}">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Box Numbers</label>
+                  <input type="text" class="form-control border-success" data-i="${idx}" data-k="boxNumbers" value="${r.boxNumbers}">
+                </div>
+                <div class="col-12 col-md-4 text-end">
+                  <button type="button" class="btn btn-outline-danger" data-action="removeB2" data-index="${idx}">Remove Row</button>
+                </div>
+              </div>
+            </div>
+          `;
+          rowsEl.appendChild(col);
+        });
+
+        moduleBContainer.querySelector('#addB2RowBtn').addEventListener('click', () => {
+          state.moduleB.B2.push({ itemNumber: '', boxNumbers: '' });
+          renderModuleB();
+        });
+
+        moduleBContainer.querySelectorAll('input[data-k]').forEach((el) => {
+          el.addEventListener('input', (e) => {
+            const i = Number(e.target.getAttribute('data-i'));
+            const k = e.target.getAttribute('data-k');
+            if (!Number.isNaN(i) && k) state.moduleB.B2[i][k] = e.target.value;
+          });
+        });
+
+        moduleBContainer.querySelectorAll('button[data-action="removeB2"]').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const i = Number(e.target.getAttribute('data-index'));
+            if (!Number.isNaN(i)) {
+              state.moduleB.B2.splice(i, 1);
+              if (state.moduleB.B2.length === 0) state.moduleB.B2.push({ itemNumber: '', boxNumbers: '' });
+              renderModuleB();
+            }
+          });
+        });
+
+        return;
+      }
+
+      if (t === 'B3') {
+        const b3 = state.moduleB.B3;
+        moduleBContainer.innerHTML = `
+          <div class="fw-semibold mb-2">One Item Number - One Box</div>
+          <div class="table-group">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">Item Number</label>
+                <input type="text" class="form-control border-success" id="b3Item" value="${b3.itemNumber}">
+              </div>
+              <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold">Box Number</label>
+                <input type="text" class="form-control border-success" id="b3Box" value="${b3.boxNumber}">
+              </div>
+            </div>
+          </div>
+        `;
+
+        moduleBContainer.querySelector('#b3Item').addEventListener('input', (e) => (state.moduleB.B3.itemNumber = e.target.value));
+        moduleBContainer.querySelector('#b3Box').addEventListener('input', (e) => (state.moduleB.B3.boxNumber = e.target.value));
+      }
+    }
+
+    packingTypeSelect.addEventListener('change', (e) => {
+      state.moduleAType = e.target.value;
+      renderModuleA();
+    });
+
+    mappingTypeSelect.addEventListener('change', (e) => {
+      state.moduleBType = e.target.value;
+      renderModuleB();
+    });
+
+    document.getElementById('packingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const payload = {
+        consigneeAddress: formData.get('consigneeAddress'),
+        deliveryAddress: formData.get('deliveryAddress'),
+        exporterAddress: formData.get('exporterAddress'),
+        packingListNo: formData.get('packingListNo'),
+        date: formData.get('date'),
+        poNumber: formData.get('poNumber'),
+        loadingPort: formData.get('loadingPort'),
+        dischargePort: formData.get('dischargePort'),
+        hsCode: formData.get('hsCode'),
+        taxNumber: formData.get('taxNumber'),
+        currency: document.getElementById('currencySelect').value,
+        moduleAType: state.moduleAType,
+        moduleA: state.moduleA[state.moduleAType],
+        moduleBType: state.moduleBType,
+        moduleB: state.moduleB[state.moduleBType],
+      };
+
+      const isEmpty = (v) => !String(v ?? '').trim();
+
+      if (state.moduleAType === 'A1') {
+        for (const r of state.moduleA.A1) {
+          if (isEmpty(r.boxNumbers) || isEmpty(r.description)) {
+            alert('Module A: Box Numbers and Description cannot be empty.');
             return;
           }
         }
-        
-        // Validate box number uniqueness across all items
-        const allBoxNumbers = [];
-        for (let item of items) {
-          for (let box of item.boxes) {
-            const boxNum = Number(box.boxNo);
-            if (isNaN(boxNum) || boxNum < 1) {
-              alert('All box numbers must be valid positive numbers.');
-              return;
-            }
-            allBoxNumbers.push(boxNum);
+      }
+
+      if (state.moduleAType === 'A2') {
+        if (isEmpty(state.moduleA.A2.boxNumber)) {
+          alert('Module A: Box Number cannot be empty.');
+          return;
+        }
+        for (const m of state.moduleA.A2.materials) {
+          if (isEmpty(m.description)) {
+            alert('Module A: Material Description cannot be empty.');
+            return;
           }
         }
-        
-        const uniqueBoxNumbers = new Set(allBoxNumbers);
-        if (uniqueBoxNumbers.size !== allBoxNumbers.length) {
-          alert('Box numbers must be unique across all items. Please check and fix duplicate box numbers.');
+      }
+
+      if (state.moduleAType === 'A3') {
+        const a3 = state.moduleA.A3;
+        if (isEmpty(a3.boxNumber) || isEmpty(a3.description)) {
+          alert('Module A: Box Number and Description cannot be empty.');
           return;
         }
-        
-        const formData = new FormData(e.target);
-        const payload = {
-          consigneeAddress: formData.get("consigneeAddress"),
-          deliveryAddress: formData.get("deliveryAddress"),
-          exporterAddress: formData.get("exporterAddress"),
-          packingListNo: formData.get("packingListNo"),
-          date: formData.get("date"),
-          poNumber: formData.get("poNumber"),
-          loadingPort: formData.get("loadingPort"),
-          dischargePort: formData.get("dischargePort"),
-          hsCode: formData.get("hsCode"),
-          taxNumber: formData.get("taxNumber"),
-          currency: document.getElementById('currencySelect').value,
-          items: items,
-        };
-        
-        // Send data to server
-        fetch('/api/packaging-list/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert('Packaging list created successfully!');
-            // Redirect to view page
-            window.location.href = '/packaging_list/view';
-          } else {
-            alert('Error: ' + data.message);
+      }
+
+      if (state.moduleBType === 'B1') {
+        for (const r of state.moduleB.B1) {
+          if (isEmpty(r.boxNumber) || isEmpty(r.itemNumbers)) {
+            alert('Module B: Box Number and Item Numbers cannot be empty.');
+            return;
           }
-        })
-        .catch(error => {
-          alert('Error submitting form: ' + error);
-          console.error('Error:', error);
-        });
-      });
-
-    function addItem() {
-      items.push({
-        material: "",
-        description: "",
-        boxes: [],
-      });
-      renderItems();
-    }
-
-    function renderItems() {
-      itemsContainer.innerHTML = "";
-      items.forEach((item, index) => {
-        const col = document.createElement("div");
-        col.className = "col-md-6";
-
-        const card = document.createElement("div");
-        card.className = "item-card p-3 mb-3 bg-white";
-
-        const headerRow = document.createElement("div");
-        headerRow.className =
-          "d-flex justify-content-between align-items-start mb-3";
-
-        const title = document.createElement("h5");
-        title.textContent = `Item ${index + 1}`;
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn btn-light btn-item-plus";
-        btn.textContent = "+";
-        btn.addEventListener("click", () => openBoxesModal(index));
-
-        headerRow.appendChild(title);
-        headerRow.appendChild(btn);
-
-        const row = document.createElement("div");
-        row.className = "row g-3";
-
-        const colMat = document.createElement("div");
-        colMat.className = "col-md-6";
-        colMat.innerHTML = `
-          <label class="form-label fw-semibold">Material</label>
-          <input type="text" class="form-control border-success"
-                 value="${item.material}"
-          />
-        `;
-
-        const colDesc = document.createElement("div");
-        colDesc.className = "col-md-6";
-        colDesc.innerHTML = `
-          <label class="form-label fw-semibold">Packaging Description</label>
-          <input type="text" class="form-control border-success"
-                 value="${item.description}"
-          />
-        `;
-
-        // bind change events
-        colMat.querySelector("input").addEventListener("input", (e) => {
-          items[index].material = e.target.value;
-        });
-        colDesc.querySelector("input").addEventListener("input", (e) => {
-          items[index].description = e.target.value;
-        });
-
-        row.appendChild(colMat);
-        row.appendChild(colDesc);
-
-        const boxesInfo = document.createElement("p");
-        boxesInfo.className = "mt-2 mb-0";
-        boxesInfo.textContent = `Boxes: ${item.boxes.length}`;
-
-        card.appendChild(headerRow);
-        card.appendChild(row);
-        card.appendChild(boxesInfo);
-
-        col.appendChild(card);
-        itemsContainer.appendChild(col);
-      });
-    }
-
-    function openBoxesModal(itemIndex) {
-      currentItemIndex = itemIndex;
-      boxesRows.innerHTML = "";
-      const item = items[itemIndex];
-
-      if (item.boxes.length === 0) {
-        addBoxRow();
-      } else {
-        item.boxes.forEach((box) => addBoxRow(box));
+        }
       }
-      boxesModal.show();
-    }
 
-    function addBoxRow(existingBox = null) {
-      const boxId = existingBox ? existingBox.boxNo : '';
-      const wrapper = document.createElement("div");
-      wrapper.className = "box-row";
-
-      wrapper.innerHTML = `
-        <div class="row g-2 align-items-center">
-          <div class="col-auto d-flex align-items-center gap-1">
-            <span class="fw-semibold">Box Number </span>
-            <span class="fw-semibold">-</span>
-            <input type="number" class="form-control form-control-sm border-success box-number"
-                   placeholder="#" value="${boxId}" min="1" style="width: 70px;">
-          </div>
-          <div class="col-1">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="Qty" value="${existingBox ? existingBox.quantity : ""}">
-          </div>
-          <div class="col-1">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="L" value="${existingBox ? existingBox.l : ""}">
-          </div>
-          <div class="col-1">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="W" value="${existingBox ? existingBox.w : ""}">
-          </div>
-          <div class="col-1">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="H" value="${existingBox ? existingBox.h : ""}">
-          </div>
-          <div class="col-2">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="Net Weight" value="${existingBox ? existingBox.netWeight : ""}">
-          </div>
-          <div class="col-2">
-            <input type="number" class="form-control form-control-sm border-success"
-                   placeholder="Gross Weight" value="${existingBox ? existingBox.grossWeight : ""}">
-          </div>
-          <div class="col-2">
-            <button type="button" class="btn btn-outline-danger btn-sm w-100">
-              Remove
-            </button>
-          </div>
-        </div>
-      `;
-
-      wrapper.dataset.boxNo = boxId;
-
-      wrapper
-        .querySelector("button")
-        .addEventListener("click", () => wrapper.remove());
-
-      boxesRows.appendChild(wrapper);
-    }
-
-    function saveBoxes() {
-      if (currentItemIndex === null) return;
-      const rows = boxesRows.querySelectorAll(".box-row");
-      const newBoxes = [];
-      const boxNumbers = [];
-      
-      // First, collect all box numbers and check for duplicates within this save
-      rows.forEach((row) => {
-        const inputs = row.querySelectorAll("input");
-        const boxNo = inputs[0].value.trim();
-        
-        if (!boxNo) {
-          alert('Please enter a box number for all boxes.');
-          return;
+      if (state.moduleBType === 'B2') {
+        for (const r of state.moduleB.B2) {
+          if (isEmpty(r.itemNumber) || isEmpty(r.boxNumbers)) {
+            alert('Module B: Item Number and Box Numbers cannot be empty.');
+            return;
+          }
         }
-        
-        const boxNumber = Number(boxNo);
-        if (isNaN(boxNumber) || boxNumber < 1) {
-          alert('Box number must be a positive number.');
-          return;
-        }
-        
-        boxNumbers.push(boxNumber);
-      });
-      
-      // Check for duplicates within current item
-      const uniqueBoxNumbers = new Set(boxNumbers);
-      if (uniqueBoxNumbers.size !== boxNumbers.length) {
-        alert('Box numbers must be unique within this item.');
-        return;
       }
-      
-      // Check for duplicates across all items
-      const allExistingBoxNumbers = [];
-      items.forEach((item, index) => {
-        if (index !== currentItemIndex) {
-          item.boxes.forEach((box) => {
-            allExistingBoxNumbers.push(Number(box.boxNo));
-          });
-        }
-      });
-      
-      for (let boxNum of boxNumbers) {
-        if (allExistingBoxNumbers.includes(boxNum)) {
-          alert(`Box number ${boxNum} already exists in another item. Please use a unique number.`);
+
+      if (state.moduleBType === 'B3') {
+        const b3 = state.moduleB.B3;
+        if (isEmpty(b3.itemNumber) || isEmpty(b3.boxNumber)) {
+          alert('Module B: Item Number and Box Number cannot be empty.');
           return;
         }
       }
-      
-      // All validations passed, save the boxes
-      rows.forEach((row, rowIndex) => {
-        const inputs = row.querySelectorAll("input");
-        const boxNo = inputs[0].value;
-        const box = {
-          boxNo: boxNo,
-          quantity: inputs[1].value,
-          l: inputs[2].value,
-          w: inputs[3].value,
-          h: inputs[4].value,
-          netWeight: inputs[5].value,
-          grossWeight: inputs[6].value,
-        };
-        newBoxes.push(box);
-      });
-      items[currentItemIndex].boxes = newBoxes;
-      renderItems();
-      currentItemIndex = null;
-    }
 
-    // initial one item
-    addItem();
+      console.log('Packing List UI Payload (UI-only):', payload);
+      alert('Captured UI data (check console).');
+    });
+
+    renderModuleA();
+    renderModuleB();
     // sync currency selection to hidden input
     const currencySelectElem = document.getElementById('currencySelect');
     if (currencySelectElem) {
@@ -593,4 +753,3 @@
   </script>
 </body>
 </html>
-```

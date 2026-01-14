@@ -1,64 +1,428 @@
 {
-  "consigneeAddress": " Address One Address One\nAddress One Address One\nAddress One Address One",
-  "taxNumber": "mmm",
-  "deliveryAddress": " Address One Address One\nAddress One Address One\nAddress One Address One",
-  "date": "2026-01-22",
-  "po_no": "4546465",
-  "packing_list_no": "qwerty123456",
-  "loding_port": "mm",
-  "discharge_port": "mmm",
-  "hs_code": "mmm",
-  "total_boxes": 4,
+  "consigneeAddress": "ABC Industries LLC\nWarehouse 5, Industrial Zone\nDubai, UAE",
+  "taxNumber": "TRN1234567890",
+  "deliveryAddress": "ABC Industries LLC\nReceiving Bay 2\nDubai, UAE",
+  "date": "2026-01-13",
+  "po_no": "PO-TEST-12345",
+  "packing_list_no": "PL-TEST-0001",
+  "loding_port": "Cochin",
+  "discharge_port": "Jebel Ali",
+  "hs_code": "85371000",
+  "total_boxes": 23,
   "items": [
     {
-      "material": "mmm",
-      "description": "mmm",
-      "boxes": [
+      "itemNos": "1",
+      "rows": [
         {
-          "boxNo": "1",
-          "quantity": "3",
-          "l": "2",
-          "w": "2",
-          "h": "2",
-          "netWeight": "2",
-          "grossWeight": "2"
+          "boxNos": "1",
+          "description": "AC Motor Control Panel",
+          "qty": "42",
+          "l": "60",
+          "w": "40",
+          "h": "25",
+          "netWt": "12",
+          "grossWt": "13"
         },
         {
-          "boxNo": "3",
-          "quantity": "3",
-          "l": "3",
-          "w": "3",
-          "h": "3",
-          "netWeight": "3",
-          "grossWeight": "3"
+          "boxNos": "2",
+          "description": "AC Motor Control Panel",
+          "qty": "43",
+          "l": "60",
+          "w": "40",
+          "h": "25",
+          "netWt": "15",
+          "grossWt": "16"
+        },
+        {
+          "boxNos": "3",
+          "description": "AC Motor Control Panel",
+          "qty": "42",
+          "l": "60",
+          "w": "40",
+          "h": "25",
+          "netWt": "8",
+          "grossWt": "9"
         }
-      ]
+      ],
+      "rowspan": 3,
+      "description_merged": true,
+      "description": "AC Motor Control Panel",
+      "description_rowspan": 3
     },
     {
-      "material": "oo",
-      "description": "oo",
-      "boxes": [
+      "itemNos": "8",
+      "rows": [
         {
-          "boxNo": "8",
-          "quantity": "8",
-          "l": "8",
-          "w": "8",
-          "h": "8",
-          "netWeight": "8",
-          "grossWeight": "8"
+          "boxNos": "8",
+          "description": "Power Supply Unit",
+          "qty": "135",
+          "l": "28",
+          "w": "20",
+          "h": "15",
+          "netWt": "6",
+          "grossWt": "7"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Power Supply Unit",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "9",
+      "rows": [
+        {
+          "boxNos": "9",
+          "description": "Terminal Block Set",
+          "qty": "30",
+          "l": "20",
+          "w": "15",
+          "h": "10",
+          "netWt": "4",
+          "grossWt": "5"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Terminal Block Set",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "10",
+      "rows": [
+        {
+          "boxNos": "4",
+          "description": "Control Relay Kit",
+          "qty": "22",
+          "l": "60",
+          "w": "40",
+          "h": "20",
+          "netWt": "6",
+          "grossWt": "7"
         },
         {
-          "boxNo": "9",
-          "quantity": "9",
-          "l": "9",
-          "w": "9",
-          "h": "9",
-          "netWeight": "9",
-          "grossWeight": "9"
+          "boxNos": "5",
+          "description": "Control Relay Kit",
+          "qty": "20",
+          "l": "56",
+          "w": "30",
+          "h": "30",
+          "netWt": "5",
+          "grossWt": "6"
         }
-      ]
+      ],
+      "rowspan": 2,
+      "description_merged": true,
+      "description": "Control Relay Kit",
+      "description_rowspan": 2
+    },
+    {
+      "itemNos": "12",
+      "rows": [
+        {
+          "boxNos": "6",
+          "description": "Terminal Block Set",
+          "qty": "2",
+          "l": "1",
+          "w": "1",
+          "h": "1",
+          "netWt": "4",
+          "grossWt": "5"
+        },
+        {
+          "boxNos": "6",
+          "description": "VFD Drive Unit",
+          "qty": "9",
+          "l": "1",
+          "w": "1",
+          "h": "1",
+          "netWt": "18",
+          "grossWt": "20"
+        },
+        {
+          "boxNos": "12",
+          "description": "Power Supply Unit",
+          "qty": "3",
+          "l": "26",
+          "w": "18",
+          "h": "12",
+          "netWt": "5",
+          "grossWt": "6"
+        }
+      ],
+      "rowspan": 3,
+      "description_merged": false,
+      "description": "",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "13",
+      "rows": [
+        {
+          "boxNos": "13",
+          "description": "Power Supply Unit",
+          "qty": "2",
+          "l": "26",
+          "w": "18",
+          "h": "12",
+          "netWt": "5",
+          "grossWt": "6"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Power Supply Unit",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "14",
+      "rows": [
+        {
+          "boxNos": "14",
+          "description": "Industrial Switch",
+          "qty": "2",
+          "l": "22",
+          "w": "16",
+          "h": "10",
+          "netWt": "3",
+          "grossWt": "4"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Industrial Switch",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "15",
+      "rows": [
+        {
+          "boxNos": "15",
+          "description": "Industrial Switch",
+          "qty": "1",
+          "l": "22",
+          "w": "16",
+          "h": "10",
+          "netWt": "2",
+          "grossWt": "3"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Industrial Switch",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "16",
+      "rows": [
+        {
+          "boxNos": "7",
+          "description": "PLC I/O Module",
+          "qty": "4",
+          "l": "28",
+          "w": "20",
+          "h": "15",
+          "netWt": "7",
+          "grossWt": "8"
+        },
+        {
+          "boxNos": "16",
+          "description": "Cable Gland Pack",
+          "qty": "50",
+          "l": "18",
+          "w": "14",
+          "h": "10",
+          "netWt": "3",
+          "grossWt": "4"
+        }
+      ],
+      "rowspan": 2,
+      "description_merged": false,
+      "description": "",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "17",
+      "rows": [
+        {
+          "boxNos": "17",
+          "description": "Cable Gland Pack",
+          "qty": "40",
+          "l": "18",
+          "w": "14",
+          "h": "10",
+          "netWt": "3",
+          "grossWt": "4"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Cable Gland Pack",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "18",
+      "rows": [
+        {
+          "boxNos": "18",
+          "description": "Copper Busbar Set",
+          "qty": "6",
+          "l": "60",
+          "w": "12",
+          "h": "6",
+          "netWt": "9",
+          "grossWt": "10"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Copper Busbar Set",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "19",
+      "rows": [
+        {
+          "boxNos": "6",
+          "description": "VFD Drive Unit",
+          "qty": "9",
+          "l": "1",
+          "w": "1",
+          "h": "1",
+          "netWt": "17",
+          "grossWt": "19"
+        },
+        {
+          "boxNos": "19",
+          "description": "Copper Busbar Set",
+          "qty": "4",
+          "l": "60",
+          "w": "12",
+          "h": "6",
+          "netWt": "8",
+          "grossWt": "9"
+        }
+      ],
+      "rowspan": 2,
+      "description_merged": false,
+      "description": "",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "20",
+      "rows": [
+        {
+          "boxNos": "20",
+          "description": "Earthing Kit",
+          "qty": "12",
+          "l": "24",
+          "w": "18",
+          "h": "12",
+          "netWt": "4",
+          "grossWt": "5"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Earthing Kit",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "21",
+      "rows": [
+        {
+          "boxNos": "21",
+          "description": "Earthing Kit",
+          "qty": "10",
+          "l": "24",
+          "w": "18",
+          "h": "12",
+          "netWt": "4",
+          "grossWt": "5"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Earthing Kit",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "22",
+      "rows": [
+        {
+          "boxNos": "22",
+          "description": "Spare Fuse Pack",
+          "qty": "100",
+          "l": "16",
+          "w": "12",
+          "h": "8",
+          "netWt": "2",
+          "grossWt": "3"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Spare Fuse Pack",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "23",
+      "rows": [
+        {
+          "boxNos": "23",
+          "description": "Spare Fuse Pack",
+          "qty": "80",
+          "l": "16",
+          "w": "12",
+          "h": "8",
+          "netWt": "2",
+          "grossWt": "3"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Spare Fuse Pack",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "24",
+      "rows": [
+        {
+          "boxNos": "24",
+          "description": "Sensor Mounting Bracket",
+          "qty": "15",
+          "l": "30",
+          "w": "22",
+          "h": "14",
+          "netWt": "5",
+          "grossWt": "6"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Sensor Mounting Bracket",
+      "description_rowspan": 1
+    },
+    {
+      "itemNos": "25",
+      "rows": [
+        {
+          "boxNos": "25",
+          "description": "Sensor Mounting Bracket",
+          "qty": "10",
+          "l": "30",
+          "w": "22",
+          "h": "14",
+          "netWt": "4",
+          "grossWt": "5"
+        }
+      ],
+      "rowspan": 1,
+      "description_merged": true,
+      "description": "Sensor Mounting Bracket",
+      "description_rowspan": 1
     }
   ],
-  "total_net_weight": "22.00",
-  "total_gross_weight": "22.00"
+  "total_net_weight": "161.00",
+  "total_gross_weight": "188.00"
 }

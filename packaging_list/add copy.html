@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Packing List - Add</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap -->
+  <link
+    href="/static/vendor/bootstrap/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Minimal custom CSS (only where Bootstrap can’t help) -->
+  <style>
+    body {
+      background-color: #f7f7f7;
+    }
+    .header-logo {
+      height: 80px;
+      width: 200px;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #000;
+      font-size: 1.1rem;
+    }
+    .card-section {
+      border: 2px solid #000;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #fff;
+      margin-bottom: 1rem;
+    }
+    .item-card {
+      border: 2px solid red;
+      border-radius: 8px;
+    }
+    .btn-add-item {
+      border: 2px solid red;
+      font-weight: 600;
+    }
+    .btn-item-plus {
+      border: 2px solid red;
+      font-size: 1.2rem;
+      line-height: 1;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .box-row {
+      margin-bottom: 0.75rem;
+    }
+    .box-row .form-control {
+      min-width: 70px;
+    }
+
+    .table-group {
+      border: 2px solid red;
+      border-radius: 8px;
+      background: #fff;
+      padding: 1rem;
+    }
+
+    .desc-input {
+      min-height: 42px;
+      resize: vertical;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo Header -->
+  <div style="text-align: center; padding: 2vh 1vw; background-color: #f8f9fa; border-bottom: 3px solid #d90000;">
+      <img src="/static/logo.jpg" alt="ZAKA Controls & Devices" style="height: 19vh; width: auto; max-width: 117vw; object-fit: contain;">
+  </div>  <div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4 text-center">
+      <div class="col-12">
+        <h2 class="fw-bold mb-0">
+          ZAKA Controls &amp; Devices - Packing List
+        </h2>
+      </div>
+    </div>
+
+    <form id="packingForm">
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Currency</label>
+          <select class="form-select" id="currencySelect">
+            <option value="USD" selected>USD ($)</option>
+            <option value="INR">INR (₹)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+          <input type="hidden" name="currency" id="currencyHidden" value="USD">
+        </div>
+      </div>
+      <!-- Addresses -->
+      <div class="card-section">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Consignee Address</label>
+            <textarea
+              class="form-control border-success"
+              rows="3"
+              name="consigneeAddress"
+              placeholder="Consignee address (3 lines)"
+            ></textarea>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Delivery Address</label>
+            <textarea
+              class="form-control border-success"
+              rows="3"
+              name="deliveryAddress"
+              placeholder="Delivery address (3 lines)"
+            ></textarea>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Exporter Address</label>
+            <textarea
+              class="form-control border-success"
+              rows="3"
+              name="exporterAddress"
+              placeholder="Exporter address (3 lines)"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Packing List No</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="packingListNo"
+              value=""
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Date</label>
+            <input
+              type="date"
+              class="form-control border-success"
+              name="date"
+              value=""
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">PO Number</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="poNumber"
+              value=""
+            />
+          </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Loading Port</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="loadingPort"
+              value=""
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Discharge Port</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="dischargePort"
+              value=""
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">HS Code</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="hsCode"
+              value=""
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Tax Number</label>
+            <input
+              type="text"
+              class="form-control border-success"
+              name="taxNumber"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="card-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Packing Groups</h5>
+          <button
+            type="button"
+            class="btn btn-light btn-add-item px-4"
+            id="addGroupBtn"
+          >
+            + Add Packing Group
+          </button>
+        </div>
+
+        <div class="row g-3" id="groupsContainer">
+          <!-- Group rows injected here -->
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-end mt-3">
+        <button type="submit" class="btn btn-primary px-5 fw-semibold" style="background-color: #28a745; border-color: #28a745; color: white; font-weight: bold;">✓ Submit</button>
+        <button type="button" class="btn px-5 fw-semibold ms-2" style="background-color: #6c757d; border-color: #6c757d; color: white; font-weight: bold;" onclick="window.history.back()">↩ Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+  <!-- Page JS -->
+  <script>
+    // Data model
+    let packingGroups = [];
+
+    const groupsContainer = document.getElementById("groupsContainer");
+
+    document
+      .getElementById("addGroupBtn")
+      .addEventListener("click", () => addGroup());
+
+    document
+      .getElementById("packingForm")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        for (let group of packingGroups) {
+          if (!group.itemNos.trim() || !group.boxNos.trim()) {
+            alert('Item Nos and Box Nos cannot be empty.');
+            return;
+          }
+        }
+
+        const formData = new FormData(e.target);
+        const payload = {
+          consigneeAddress: formData.get("consigneeAddress"),
+          deliveryAddress: formData.get("deliveryAddress"),
+          exporterAddress: formData.get("exporterAddress"),
+          packingListNo: formData.get("packingListNo"),
+          date: formData.get("date"),
+          poNumber: formData.get("poNumber"),
+          loadingPort: formData.get("loadingPort"),
+          dischargePort: formData.get("dischargePort"),
+          hsCode: formData.get("hsCode"),
+          taxNumber: formData.get("taxNumber"),
+          currency: document.getElementById('currencySelect').value,
+          items: packingGroups,
+        };
+        
+        // Send data to server
+        fetch('/api/packaging-list/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Packaging list created successfully!');
+            // Redirect to view page
+            window.location.href = '/packaging_list/view';
+          } else {
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          alert('Error submitting form: ' + error);
+          console.error('Error:', error);
+        });
+      });
+
+    function addGroup() {
+      packingGroups.push({
+        itemNos: "",
+        boxNos: "",
+        description: "",
+        qty: "",
+        l: "",
+        w: "",
+        h: "",
+        netWt: "",
+        grossWt: "",
+      });
+      renderGroups();
+    }
+
+    function renderGroups() {
+      groupsContainer.innerHTML = "";
+      packingGroups.forEach((group, index) => {
+        const col = document.createElement("div");
+        col.className = "col-12";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-group";
+
+        wrapper.innerHTML = `
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-2">
+              <label class="form-label fw-semibold">Item Nos</label>
+              <input type="text" class="form-control border-success item-nos-input" placeholder="e.g. 12, 13" value="${group.itemNos}">
+            </div>
+
+            <div class="col-12 col-md-2">
+              <label class="form-label fw-semibold">Box Nos</label>
+              <input type="text" class="form-control border-success box-nos-input" placeholder="e.g. 6, 7" value="${group.boxNos}">
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold">Material &amp; Packaging Description</label>
+              <div class="input-group">
+                <textarea class="form-control border-success desc-input" rows="2" placeholder="Description">${group.description}</textarea>
+                ${index === 0 ? '' : '<button type="button" class="btn btn-outline-secondary copy-desc-btn" title="Copy from above">📋</button>'}
+              </div>
+            </div>
+
+            <div class="col-6 col-md-1">
+              <label class="form-label fw-semibold">Qty</label>
+              <input type="text" class="form-control border-success qty-input" value="${group.qty}">
+            </div>
+
+            <div class="col-4 col-md-1">
+              <label class="form-label fw-semibold">L</label>
+              <input type="text" class="form-control border-success l-input" value="${group.l}">
+            </div>
+            <div class="col-4 col-md-1">
+              <label class="form-label fw-semibold">W</label>
+              <input type="text" class="form-control border-success w-input" value="${group.w}">
+            </div>
+            <div class="col-4 col-md-1">
+              <label class="form-label fw-semibold">H</label>
+              <input type="text" class="form-control border-success h-input" value="${group.h}">
+            </div>
+
+            <div class="col-6 col-md-1">
+              <label class="form-label fw-semibold">Net</label>
+              <input type="text" class="form-control border-success netwt-input" value="${group.netWt}">
+            </div>
+            <div class="col-6 col-md-1">
+              <label class="form-label fw-semibold">Gross</label>
+              <input type="text" class="form-control border-success grosswt-input" value="${group.grossWt}">
+            </div>
+          </div>
+        `;
+
+        wrapper
+          .querySelector(".item-nos-input")
+          .addEventListener("input", (e) => (packingGroups[index].itemNos = e.target.value));
+        wrapper
+          .querySelector(".box-nos-input")
+          .addEventListener("input", (e) => (packingGroups[index].boxNos = e.target.value));
+        wrapper
+          .querySelector(".desc-input")
+          .addEventListener("input", (e) => (packingGroups[index].description = e.target.value));
+
+        const copyBtn = wrapper.querySelector(".copy-desc-btn");
+        if (copyBtn) {
+          copyBtn.addEventListener("click", () => {
+            packingGroups[index].description = packingGroups[index - 1].description;
+            renderGroups();
+          });
+        }
+        wrapper
+          .querySelector(".qty-input")
+          .addEventListener("input", (e) => (packingGroups[index].qty = e.target.value));
+        wrapper
+          .querySelector(".l-input")
+          .addEventListener("input", (e) => (packingGroups[index].l = e.target.value));
+        wrapper
+          .querySelector(".w-input")
+          .addEventListener("input", (e) => (packingGroups[index].w = e.target.value));
+        wrapper
+          .querySelector(".h-input")
+          .addEventListener("input", (e) => (packingGroups[index].h = e.target.value));
+        wrapper
+          .querySelector(".netwt-input")
+          .addEventListener("input", (e) => (packingGroups[index].netWt = e.target.value));
+        wrapper
+          .querySelector(".grosswt-input")
+          .addEventListener("input", (e) => (packingGroups[index].grossWt = e.target.value));
+
+        col.appendChild(wrapper);
+        groupsContainer.appendChild(col);
+      });
+    }
+
+    // initial one group
+    addGroup();
+    // sync currency selection to hidden input
+    const currencySelectElem = document.getElementById('currencySelect');
+    if (currencySelectElem) {
+      const currencyHidden = document.getElementById('currencyHidden');
+      currencySelectElem.addEventListener('change', (e) => {
+        if (currencyHidden) currencyHidden.value = e.target.value;
+      });
+    }
+  </script>
+</body>
+</html>

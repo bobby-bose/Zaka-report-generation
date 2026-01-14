@@ -92,22 +92,29 @@ db = SQLAlchemy(app)
 class PackagingList(db.Model):
     __tablename__ = 'packaging_list'
     id = db.Column(db.Integer, primary_key=True)
-    packingListNo = db.Column('packingListNo', db.String(100), nullable=True)
-    date = db.Column('date', db.Date, nullable=True)
-    consigneeAddress = db.Column('consigneeAddress', db.Text, nullable=True)
-    deliveryAddress = db.Column('deliveryAddress', db.Text, nullable=True)
-    exporterAddress = db.Column('exporterAddress', db.Text, nullable=True)
-    poNumber = db.Column('poNumber', db.String(100), nullable=True)
-    loadingPort = db.Column('loadingPort', db.String(100), nullable=True)
-    dischargePort = db.Column('dischargePort', db.String(100), nullable=True)
-    hsCode = db.Column('hsCode', db.String(100), nullable=True)
-    taxNumber = db.Column('taxNumber', db.String(100), nullable=True)
-    items = db.Column('items', db.JSON, nullable=True)
-    total_net_weight = db.Column('total_net_weight', db.Float, nullable=True)
-    total_gross_weight = db.Column('total_gross_weight', db.Float, nullable=True)
-    status = db.Column('status', db.String(20), default='Completed')
-    created_at = db.Column('created_at', db.DateTime, default=datetime.now)
-    updated_at = db.Column('updated_at', db.DateTime, default=datetime.now, onupdate=datetime.now)
+    packingListNo = db.Column(db.String(100), nullable=True)
+    date = db.Column(db.Date, nullable=True)
+    consigneeAddress = db.Column(db.Text, nullable=True)
+    deliveryAddress = db.Column(db.Text, nullable=True)
+    exporterAddress = db.Column(db.Text, nullable=True)
+    poNumber = db.Column(db.String(100), nullable=True)
+    loadingPort = db.Column(db.String(100), nullable=True)
+    dischargePort = db.Column(db.String(100), nullable=True)
+    hsCode = db.Column(db.String(100), nullable=True)
+    taxNumber = db.Column(db.String(100), nullable=True)
+    
+    # New Fields for the Module System
+    currency = db.Column(db.String(10), default='USD')
+    moduleAType = db.Column(db.String(10)) # A1, A2, or A3
+    moduleA_data = db.Column(db.JSON)       # Stores the list or object for Module A
+    moduleBType = db.Column(db.String(10)) # B1, B2, or B3
+    moduleB_data = db.Column(db.JSON)       # Stores the list or object for Module B
+    
+    total_net_weight = db.Column(db.Float, default=0.0)
+    total_gross_weight = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), default='Completed')
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
 
 class ProformaInvoice(db.Model):
     __tablename__ = 'proforma_invoice'
@@ -254,16 +261,77 @@ def packaging_list_print(id):
         total_net_weight = 0
         total_gross_weight = 0
         total_boxes = 0
-        
+
+        def _safe_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0.0
+
+        unique_boxes = set()
         for item in items_data:
-            if 'boxes' in item:
-                total_boxes += len(item['boxes'])
-                for box in item['boxes']:
-                    # Try both camelCase and snake_case for compatibility
-                    net = box.get('netWeight') or box.get('net_weight', 0)
-                    gross = box.get('grossWeight') or box.get('gross_weight', 0)
-                    total_net_weight += float(net) if net else 0
-                    total_gross_weight += float(gross) if gross else 0
+            net = item.get('netWt') or item.get('netWeight') or item.get('net_weight', 0)
+            gross = item.get('grossWt') or item.get('grossWeight') or item.get('gross_weight', 0)
+            total_net_weight += _safe_float(net)
+            total_gross_weight += _safe_float(gross)
+
+            box_nos = item.get('boxNos') or ''
+            for part in str(box_nos).split(','):
+                box = part.strip()
+                if box:
+                    unique_boxes.add(box)
+
+        total_boxes = len(unique_boxes)
+
+        def _to_int_or_str(val):
+            s = str(val).strip()
+            if s.isdigit():
+                return int(s)
+            return s
+
+        sorted_items = sorted(
+            items_data,
+            key=lambda x: (
+                _to_int_or_str(x.get('itemNos', '')),
+                _to_int_or_str(x.get('boxNos', '')),
+                str(x.get('description', '')).strip(),
+            ),
+        )
+
+        grouped_items = []
+        current = None
+        for item in sorted_items:
+            item_nos = str(item.get('itemNos', '')).strip()
+            desc = str(item.get('description', '')).strip()
+
+            row = {
+                'boxNos': str(item.get('boxNos', '')).strip(),
+                'description': desc,
+                'qty': item.get('qty', ''),
+                'l': item.get('l', ''),
+                'w': item.get('w', ''),
+                'h': item.get('h', ''),
+                'netWt': item.get('netWt') or item.get('netWeight') or item.get('net_weight', ''),
+                'grossWt': item.get('grossWt') or item.get('grossWeight') or item.get('gross_weight', ''),
+            }
+
+            if current and current.get('itemNos') == item_nos:
+                current['rows'].append(row)
+                current['rowspan'] = len(current['rows'])
+            else:
+                current = {
+                    'itemNos': item_nos,
+                    'rows': [row],
+                    'rowspan': 1,
+                }
+                grouped_items.append(current)
+
+        for g in grouped_items:
+            descriptions = [str(r.get('description', '')).strip() for r in g.get('rows', [])]
+            first_desc = descriptions[0] if descriptions else ''
+            g['description_merged'] = bool(descriptions) and all(d == first_desc for d in descriptions)
+            g['description'] = first_desc if g['description_merged'] else ''
+            g['description_rowspan'] = g['rowspan'] if g['description_merged'] else 1
         
         data = {
             'consigneeAddress': record.consigneeAddress or '',
@@ -276,7 +344,7 @@ def packaging_list_print(id):
             'discharge_port': record.dischargePort or '',
             'hs_code': record.hsCode or '',
             'total_boxes': total_boxes,
-            'items': items_data,
+            'items': grouped_items,
             'total_net_weight': f"{total_net_weight:.2f}",
             'total_gross_weight': f"{total_gross_weight:.2f}"
         }
@@ -357,31 +425,115 @@ def zc_exporter_print(id):
         return render_template('ZC/start.html', **data)
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
+from flask import request, jsonify
+from datetime import datetime
+import json
+import os
 
-# API Routes for Form Submissions
 @app.route('/api/packaging-list/create', methods=['POST'])
 def create_packaging_list():
     try:
         data = request.get_json()
         
-        # Calculate totals from items
-        items_data = data.get('items', [])
-        total_net_weight = 0
-        total_gross_weight = 0
+        # --- 1. Helper for Float Conversion ---
+        def _sf(v):
+            try: return float(v) if v else 0.0
+            except: return 0.0
+
+        a_type = data.get('moduleAType')
+        a_data = data.get('moduleA', {})
+        b_data = data.get('moduleB', [])
+
+        # --- 2. Calculate Weights (User Logic) ---
+        total_net = 0.0
+        total_gross = 0.0
+
+        if a_type == 'A1': # List of multiple box objects
+            for r in a_data:
+                total_net += _sf(r.get('netWt'))
+                total_gross += _sf(r.get('grossWt'))
+        elif a_type == 'A2': # Nested Materials
+            for m in a_data.get('materials', []):
+                total_net += _sf(m.get('netWt'))
+                total_gross += _sf(m.get('grossWt'))
+        elif a_type == 'A3': # Single Box Object
+            total_net = _sf(a_data.get('netWt'))
+            total_gross = _sf(a_data.get('grossWt'))
+
+        # --- 3. Transformation: Build the Relational JSON ---
+        # We pivot on Box Number but group by Item Number (Left Side)
         
-        for item in items_data:
-            if 'boxes' in item:
-                for box in item['boxes']:
-                    # Try both camelCase and snake_case for compatibility
-                    net = box.get('netWeight') or box.get('net_weight', 0)
-                    gross = box.get('grossWeight') or box.get('gross_weight', 0)
-                    total_net_weight += float(net) if net else 0
-                    total_gross_weight += float(gross) if gross else 0
-        
-        # Create new packaging list entry
+        # Step A: Create a lookup for Box Details from Module A
+        # (Handling the common A3 single-object case or A1 list case)
+        box_lookup = {}
+        if a_type == 'A3':
+            b_no = str(a_data.get('boxNumber'))
+            box_lookup[b_no] = a_data
+        elif a_type == 'A1':
+            for b in a_data:
+                box_lookup[str(b.get('boxNumber'))] = b
+
+        # Step B: Build Item Hierarchies (The "Left Side" logic)
+        item_hierarchies = []
+        for item in b_data:
+            item_no = item.get('itemNumber')
+            # Extract box numbers (handling "1,2,3" strings or lists)
+            box_refs = item.get('boxNumbers', "")
+            if isinstance(box_refs, str):
+                box_list = [b.strip() for b in box_refs.split(',') if b.strip()]
+            else:
+                box_list = [str(b) for b in box_refs]
+
+            # Sort boxes for this item in ascending order
+            box_list.sort(key=lambda x: int(x) if x.isdigit() else x)
+
+            # Determine Relationship Type
+            rel_type = "One-to-One"
+            if len(box_list) > 1:
+                rel_type = "One-to-Many"
+            # Note: Many-to-One is handled by the data naturally if multiple 
+            # item numbers reference the same box number in the loop.
+
+            # Map details from the "Right Side" (Module A)
+            associated_boxes = []
+            for b_no in box_list:
+                details = box_lookup.get(b_no, {})
+                associated_boxes.append({
+                    "boxNo": b_no,
+                    "description": details.get('description', 'N/A'),
+                    "qty": details.get('qty', 0),
+                    "dimensions": {
+                        "l": details.get('l'),
+                        "w": details.get('w'),
+                        "h": details.get('h')
+                    },
+                    "weights": {
+                        "net": details.get('netWt'),
+                        "gross": details.get('grossWt')
+                    }
+                })
+
+            item_hierarchies.append({
+                "itemNumber": item_no,
+                "relationship": rel_type,
+                "associatedBoxes": associated_boxes
+            })
+
+        # --- 4. Final Structured Data Object ---
+        # This reflects the format you requested for the JSON output and DB storage
+        final_relational_data = {
+            "itemHierarchies": item_hierarchies,
+            "summary": {
+                "total_net": total_net,
+                "total_gross": total_gross,
+                "currency": data.get('currency', 'USD')
+            }
+        }
+
+        # --- 5. Save to Database ---
         packaging = PackagingList(
             packingListNo=data.get('packingListNo'),
-            date=datetime.strptime(data.get('date', ''), '%Y-%m-%d').date() if data.get('date') else None,
+            date=datetime.strptime(data.get('date'), '%Y-%m-%d').date() if data.get('date') else None,
             consigneeAddress=data.get('consigneeAddress'),
             deliveryAddress=data.get('deliveryAddress'),
             exporterAddress=data.get('exporterAddress'),
@@ -390,19 +542,35 @@ def create_packaging_list():
             dischargePort=data.get('dischargePort'),
             hsCode=data.get('hsCode'),
             taxNumber=data.get('taxNumber'),
-            items=items_data,
-            total_net_weight=total_net_weight,
-            total_gross_weight=total_gross_weight
+            currency=data.get('currency'),
+            moduleAType=a_type,
+            moduleA_data=a_data,          # Original raw box data
+            moduleBType=data.get('moduleBType'),
+            moduleB_data=final_relational_data, # STORE THE NEW STRUCTURED RELATIONSHIP HERE
+            total_net_weight=total_net,
+            total_gross_weight=total_gross
         )
-        
         db.session.add(packaging)
         db.session.commit()
+
+        # --- 6. Create .json file ---
+        filename = f"packing_list_{data.get('packingListNo') or 'temp'}.json"
+        file_path = os.path.join(os.getcwd(), filename)
         
-        return jsonify({'success': True, 'message': 'Packaging list created successfully', 'id': packaging.id}), 201
+        with open(file_path, 'w') as f:
+            # We dump the relational data to the file as well
+            json.dump(final_relational_data, f, indent=4)
+
+        return jsonify({
+            'success': True, 
+            'message': f'Saved to DB and created {filename}', 
+            'data': final_relational_data, # Return the relational format
+            'id': packaging.id
+        }), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
-
 @app.route('/api/packaging-list/<int:id>/update', methods=['PUT'])
 def update_packaging_list(id):
     try:
@@ -430,15 +598,18 @@ def update_packaging_list(id):
         items_data = packaging.items or []
         total_net_weight = 0
         total_gross_weight = 0
-        
+
+        def _safe_float(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return 0.0
+
         for item in items_data:
-            if 'boxes' in item:
-                for box in item['boxes']:
-                    # Try both camelCase and snake_case for compatibility
-                    net = box.get('netWeight') or box.get('net_weight', 0)
-                    gross = box.get('grossWeight') or box.get('gross_weight', 0)
-                    total_net_weight += float(net) if net else 0
-                    total_gross_weight += float(gross) if gross else 0
+            net = item.get('netWt') or item.get('netWeight') or item.get('net_weight', 0)
+            gross = item.get('grossWt') or item.get('grossWeight') or item.get('gross_weight', 0)
+            total_net_weight += _safe_float(net)
+            total_gross_weight += _safe_float(gross)
         
         packaging.total_net_weight = total_net_weight
         packaging.total_gross_weight = total_gross_weight

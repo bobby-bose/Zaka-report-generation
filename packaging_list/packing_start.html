@@ -240,23 +240,24 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in items %}
-                {% set box_count = item.boxes | length %}
-                {% set outer_loop = loop %}
-                {% for box in item.boxes %}
+            {% for group in items %}
+                {% for row in group.rows %}
                 <tr>
-                    {# Item No. and Material: Use rowspan on the first box only #}
                     {% if loop.first %}
-                    <td class="item-no" rowspan="{{ box_count }}" style="vertical-align: middle;">{{ item.item_number or outer_loop.index }}</td>
-                    <td class="material-desc" rowspan="{{ box_count }}" style="vertical-align: middle;">{{ item.material }},{{ item.description }}</td>
+                    <td class="item-no text-center" rowspan="{{ group.rowspan }}" style="vertical-align: middle;">{{ group.itemNos }}</td>
+                    {% if group.description_merged %}
+                    <td class="material-desc" rowspan="{{ group.description_rowspan }}" style="vertical-align: middle;">{{ group.description }}</td>
+                    {% endif %}
                     {% endif %}
 
-                    {# Box-specific details (always rendered) #}
-                    <td class="box-no text-center">{{ box.boxNo }}</td>
-                    <td class="qty text-center">{{ box.quantity }}</td>
-                    <td class="dimension text-center">{{ box.l }} (L) x {{ box.w }} (W) x {{ box.h }} (H) cm</td>
-                    <td class="net-weight text-center">{{ box.netWeight }}</td>
-                    <td class="gross-weight text-center">{{ box.grossWeight }}</td>
+                    {% if not group.description_merged %}
+                    <td class="material-desc">{{ row.description }}</td>
+                    {% endif %}
+                    <td class="box-no text-center">{{ row.boxNos }}</td>
+                    <td class="qty text-center">{{ row.qty }}</td>
+                    <td class="dimension text-center">{{ row.l }} (L) x {{ row.w }} (W) x {{ row.h }} (H) cm</td>
+                    <td class="net-weight text-center">{{ row.netWt }}</td>
+                    <td class="gross-weight text-center">{{ row.grossWt }}</td>
                 </tr>
                 {% endfor %}
             {% endfor %}

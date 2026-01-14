@@ -1,0 +1,76 @@
+
+### **SYSTEM SPECIFICATION: PACKING LIST TRANSFORMATION LOGIC**
+
+**1. PURPOSE**
+To verify that the backend correctly transforms flat "Module A" (Box Data) and "Module B" (Item Mapping) into a relational hierarchy where Item Numbers are parents (Left Side) and Box Details are children (Right Side), sorted by Box Number ascending.
+
+**2. INPUT DATA (MOCK POST REQUEST)**
+
+```json
+{
+    "packingListNo": "PL-2026-001",
+    "moduleAType": "A1",
+    "moduleA": [
+        {"boxNumber": "1", "description": "GRP Sunshade", "qty": "42", "netWt": "33.8", "grossWt": "35.9"},
+        {"boxNumber": "10", "description": "GRP Sunshade", "qty": "22", "netWt": "30.4", "grossWt": "33.3"},
+        {"boxNumber": "6", "description": "Sounder STExS1F", "qty": "11", "netWt": "27.5", "grossWt": "29.2"}
+    ],
+    "moduleBType": "B2",
+    "moduleB": [
+        {"itemNumber": "1", "boxNumbers": "1"},
+        {"itemNumber": "12", "boxNumbers": "6"},
+        {"itemNumber": "10", "boxNumbers": "10"}
+    ]
+}
+
+```
+
+**3. TRANSFORMATION RULES (FOR BACKEND ANALYSIS)**
+
+* **Pivot Point:** Use `boxNumber` as the unique key to join Module A and Module B.
+* **Relationship Mapping:** * If one Item has multiple Box Numbers -> **One-to-Many**.
+* If multiple Items share one Box Number -> **Many-to-One**.
+
+
+* **Sorting:** Ensure boxes are sorted numerically (`1, 2, 3... 10`) not alphabetically (`1, 10, 2`).
+* **Weight Calculation:** Aggregate `netWt` and `grossWt` based on the `moduleAType` logic (A1, A2, or A3).
+
+**4. EXPECTED OUTPUT FORMAT (THE "LEFT-RIGHT" STRUCTURE)**
+The AI should verify the `moduleB_data` column or the final JSON response matches this:
+
+```json
+{
+  "itemHierarchies": [
+    {
+      "itemNumber": "1",
+      "relationship": "One-to-One",
+      "associatedBoxes": [
+        {
+          "boxNo": "1",
+          "description": "GRP Sunshade",
+          "weights": {"net": 33.8, "gross": 35.9}
+        }
+      ]
+    },
+    {
+      "itemNumber": "12",
+      "relationship": "Many-to-One",
+      "associatedBoxes": [
+        {
+          "boxNo": "6",
+          "description": "Sounder STExS1F",
+          "weights": {"net": 27.5, "gross": 29.2}
+        }
+      ]
+    }
+  ]
+}
+
+```
+
+**5. PRE-SUBMISSION CHECKPOINTS FOR AGENTIC AI**
+
+1. **Backend Check:** Does the code use `int(boxNumber)` for sorting? (To avoid Box 10 appearing before Box 2).
+2. **HTML Check:** Does `add.html` correctly capture comma-separated strings in the `boxNumbers` field of Module B?
+3. **Data Integrity:** If a Box Number is entered in Module B but does not exist in Module A, does the system handle the `null` description gracefully?
+4. **Database Check:** Is the `moduleB_data` column saving the **Transformed Hierarchy** instead of the raw input?
