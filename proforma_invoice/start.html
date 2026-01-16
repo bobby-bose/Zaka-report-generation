@@ -189,8 +189,8 @@ Kerala - Thrissur, India, Pin-680685
 <th style="width:5%">No</th>
 <th style="width:55%">Part No / Item Description</th>
 <th style="width:10%">Qty</th>
-<th style="width:15%">Unit Rate ({{ currency }})</th>
-<th style="width:15%">Total ({{ currency }})</th>
+<th style="width:15%">Unit Rate</th>
+<th style="width:15%">Total</th>
 </tr>
 </thead>
 <tbody>
@@ -217,13 +217,11 @@ Kerala - Thrissur, India, Pin-680685
         <!-- RECEIVABLE AMOUNT -->
         <tr>
             <td colspan="4" style="font-weight:bold;">
-                Receivable Amount ({{ discount_percent }}%)<br>
-                <span style="text-transform:uppercase;">
-                    {{ receivable_amount_words }}
-                </span>
+                Advance Amount<br>
+               
             </td>
             <td class="text-right" style="font-weight:bold;">
-                {{ discount_amount }}
+                {{ advance_amount }}
             </td>
         </tr>
 
@@ -240,10 +238,8 @@ Kerala - Thrissur, India, Pin-680685
         <!-- BALANCE RECEIVABLE -->
         <tr>
             <td colspan="4" style="font-weight:bold;">
-                Balance receivable of {{ discount_percent }}% Advance<br>
-                <span style="text-transform:uppercase; margin-top: 8px; display: inline-block;">
-                    {{ balance_amount_words }}
-                </span>
+                Balance receivable<br>
+                
             </td>
             <td class="text-right" style="font-weight:bold;">
                 {{ balance_amount }}

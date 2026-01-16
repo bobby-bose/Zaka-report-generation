@@ -1,39 +1,40 @@
 {
-  "bill_to_address": "555\n55\n55",
-  "date": "2025-12-12",
-  "invoice_no": "555",
-  "po_wo_number": "555",
-  "your_reference_no": "999999999",
-  "our_reference_no": "555",
+  "bill_to_address": "q",
+  "date": "",
+  "invoice_no": "q",
+  "po_wo_number": "q",
+  "your_reference_no": "q",
+  "our_reference_no": "q",
   "currency": "USD",
   "items": [
     {
       "lineNo": 1,
-      "partNumber": "5",
-      "description": "5",
-      "quantity": "55",
-      "unitRate": "55",
-      "total": "3025.00$"
+      "partNumber": "q",
+      "description": "q",
+      "quantity": "20",
+      "unitRate": "20",
+      "total": "400.00$"
     },
     {
       "lineNo": 2,
-      "partNumber": "55",
-      "description": "5",
-      "quantity": "5",
-      "unitRate": "55",
-      "total": "275.00$"
+      "partNumber": "q",
+      "description": "q",
+      "quantity": "20",
+      "unitRate": "20",
+      "total": "400.00$"
     }
   ],
-  "total_amount": "3300.00",
-  "discount_percent": "20",
-  "discount_amount": "660.00",
-  "received_details": "hello",
-  "received_amount": "20",
-  "balance_amount": "2620.00",
-  "balance_amount_words": "Two Thousand Six Hundred Twenty Rupees",
-  "receivable_amount_words": "Six Hundred Sixty Rupees",
-  "country_of_origin": "hhhh",
-  "port_of_embarkation": "hhhh",
+  "total_amount": "800.00",
+  "advance_amount": "100.00",
+  "advance_amount_display": "1.11",
+  "received_details": "HHHHH",
+  "received_amount": "100.00",
+  "balance_amount": "600.00",
+  "balance_amount_display": 600.0,
+  "balance_amount_words": "Six Hundred Rupees",
+  "advance_amount_words": "One Hundred Rupees",
+  "country_of_origin": "b",
+  "port_of_embarkation": "b",
   "port_of_discharge": "Rotterdam Port",
-  "date_created": "2025-12-21"
+  "date_created": "2026-01-16"
 }

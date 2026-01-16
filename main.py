@@ -129,6 +129,7 @@ class ProformaInvoice(db.Model):
     bill_to_address = db.Column(db.Text, nullable=True)
     total_amount = db.Column(db.String(50), nullable=True)
     currency = db.Column(db.String(10), nullable=True)
+    advance_amount = db.Column(db.String(50), nullable=True)
     discount_percentage = db.Column(db.String(50), nullable=True)
     discount_amount = db.Column(db.String(50), nullable=True)
     receivable_amount = db.Column(db.String(50), nullable=True)
@@ -205,6 +206,23 @@ def _ensure_packaging_list_schema():
             if col in existing:
                 continue
             conn.execute(text(f'ALTER TABLE packaging_list ADD COLUMN {col} {ddl}'))
+
+
+def _ensure_proforma_invoice_schema():
+    if not (db.engine and db.engine.url and db.engine.url.drivername and db.engine.url.drivername.startswith('sqlite')):
+        return
+
+    wanted = {
+        'advance_amount': 'VARCHAR(50)',
+    }
+
+    with db.engine.begin() as conn:
+        cols = conn.execute(text('PRAGMA table_info(proforma_invoice)')).fetchall()
+        existing = {row[1] for row in cols}
+        for col, ddl in wanted.items():
+            if col in existing:
+                continue
+            conn.execute(text(f'ALTER TABLE proforma_invoice ADD COLUMN {col} {ddl}'))
 
 # Define the folders and their routes
 FORMS = {
@@ -432,11 +450,42 @@ def proforma_invoice_print(id):
         record = ProformaInvoice.query.get(id)
         if not record:
             return jsonify({'success': False, 'message': 'Record not found'}), 404
-        
-        # Prepare line items
-        items_data = record.line_items if record.line_items else []
-        
-        # Create data dictionary
+
+        def _sf(v):
+            try:
+                if v is None:
+                    return 0.0
+                if isinstance(v, (int, float)):
+                    return float(v)
+                s = str(v)
+                cleaned = ''.join(ch for ch in s if (ch.isdigit() or ch in '.-'))
+                return float(cleaned) if cleaned else 0.0
+            except Exception:
+                return 0.0
+
+        currency = (record.currency or 'USD').strip()
+        currency_u = currency.upper()
+        rate = 1.0
+        if currency_u == 'USD':
+            rate = 90.0
+        elif currency_u in ('DINAR', 'DNR', 'KWD'):
+            rate = 286.0
+
+        total_in_inr = _sf(record.total_amount)
+        advance_in_inr = _sf(record.advance_amount)
+        received_in_inr = _sf(record.received_amount)
+        balance_in_inr = _sf(record.balance_amount)
+
+        # These are used in the right-side numeric cells.
+        total_amount_fmt = f"{total_in_inr:.2f}"
+        advance_amount_fmt = f"{advance_in_inr:.2f}"
+        received_amount_fmt = f"{received_in_inr:.2f}"
+        balance_amount_fmt = f"{balance_in_inr:.2f}"
+
+        # These are used in the left-side spans; convert from INR when currency is USD/DINAR.
+        advance_amount_display = f"{(advance_in_inr / rate):.2f}"
+        balance_amount_display = f"{(balance_in_inr / rate):.2f}"
+
         data = {
             'bill_to_address': record.bill_to_address or '',
             'date': record.invoice_date or '',
@@ -444,30 +493,26 @@ def proforma_invoice_print(id):
             'po_wo_number': record.po_wo_number or '',
             'your_reference_no': record.your_reference_no or '',
             'our_reference_no': record.our_ref_no or '',
-            'currency': record.currency or 'USD',
-            'items': items_data,
-            'total_amount': record.total_amount or '0.00',
-            'discount_percent': record.discount_percentage or '0',
-            'discount_amount': record.discount_amount or '0.00',
+            'currency': currency,
+            'items': record.line_items or [],
+
+            'total_amount': total_amount_fmt,
+            'advance_amount': advance_amount_fmt,
             'received_details': record.receivable_amount or '',
-            'received_amount': record.received_amount or '0.00',
-            'balance_amount': record.balance_amount or '0.00',
-            'balance_amount_words': number_to_words(record.balance_amount or '0.00'),
-            'receivable_amount_words': number_to_words(record.discount_amount or '0.00'),
+            'received_amount': received_amount_fmt,
+            'balance_amount': balance_amount_fmt,
+
+            'advance_amount_display': advance_amount_display,
+            'balance_amount_display': balance_amount_display,
+
             'country_of_origin': record.country_of_origin or '',
             'port_of_embarkation': record.port_of_embarkation or '',
             'port_of_discharge': record.port_of_discharge or '',
             'date_created': record.created_at.strftime('%Y-%m-%d') if record.created_at else ''
         }
-        
-        # Save to JSON file in proforma_invoice folder
-        proforma_folder = os.path.join(os.path.dirname(__file__), 'proforma_invoice')
-        json_file_path = os.path.join(proforma_folder, 'data.json')
-        
-        with open(json_file_path, 'w') as f:
-            json.dump(data, f, indent=2)
-        
+
         return render_template('proforma_invoice/start.html', **data)
+
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 
@@ -825,8 +870,69 @@ def update_packaging_list(id):
 def create_proforma_invoice():
     try:
         data = request.get_json()
-        
-        # Create new proforma invoice entry
+
+        def _sf(v):
+            try:
+                if v is None:
+                    return 0.0
+                if isinstance(v, (int, float)):
+                    return float(v)
+                s = str(v)
+                cleaned = ''.join(ch for ch in s if (ch.isdigit() or ch in '.-'))
+                return float(cleaned) if cleaned else 0.0
+            except Exception:
+                return 0.0
+
+        currency = (data.get('currency') or 'INR').strip().upper()
+
+        # Conversion divisor (from INR to selected currency)
+        divisor = 1.0
+        if currency == 'USD':
+            divisor = 90.0
+        elif currency in ('DINAR', 'DNR', 'KWD'):
+            divisor = 286.0
+
+        # Values entered (assumed INR reference)
+        total_inr = _sf(data.get('totalAmount'))
+        advance_inr = _sf(data.get('advanceAmount'))
+        received_inr = _sf(data.get('receivedAmount'))
+
+        # Convert line items BEFORE storing (assumed INR reference)
+        line_items_final = []
+        raw_items = data.get('lineItems') or []
+        if isinstance(raw_items, list):
+            for it in raw_items:
+                if not isinstance(it, dict):
+                    continue
+                qty = _sf(it.get('quantity'))
+                unit_inr = _sf(it.get('unitRate'))
+                total_line_inr = _sf(it.get('total'))
+
+                unit_final = round(unit_inr / divisor, 2)
+                if total_line_inr:
+                    total_final_line = round(total_line_inr / divisor, 2)
+                else:
+                    total_final_line = round(qty * unit_final, 2)
+
+                line_items_final.append({
+                    'lineNo': it.get('lineNo'),
+                    'partNumber': it.get('partNumber') or '',
+                    'description': it.get('description') or '',
+                    'quantity': str(it.get('quantity') or ''),
+                    'unitRate': f"{unit_final:.2f}",
+                    'total': f"{total_final_line:.2f}",
+                })
+
+        # Convert BEFORE storing
+        total_final = round(total_inr / divisor, 2)
+        advance_final = round(advance_inr / divisor, 2)
+        received_final = round(received_inr / divisor, 2)
+
+        receivable_final = round(total_final - advance_final, 2)
+        balance_final = round(receivable_final - received_final, 2)
+
+
+
         invoice = ProformaInvoice(
             invoice_date=data.get('invoiceDate'),
             invoice_no=data.get('invoiceNo'),
@@ -835,26 +941,49 @@ def create_proforma_invoice():
             your_reference_no=data.get('yourReferenceNo'),
             supplier_address=data.get('supplierAddress'),
             bill_to_address=data.get('billToAddress'),
-            total_amount=data.get('totalAmount'),
-            currency=data.get('currency'),
-            discount_percentage=data.get('discountPercentage'),
-            discount_amount=data.get('discountAmount'),
-            receivable_amount=data.get('receivableAmount'),
-            received_amount=data.get('receivedAmount'),
-            balance_amount=data.get('balanceAmount'),
+
+            currency=currency,
+
+            total_amount=total_final,
+            advance_amount=advance_final,
+            receivable_amount=receivable_final,
+            received_amount=received_final,
+            balance_amount=balance_final,
+
             country_of_origin=data.get('countryOfOrigin'),
             port_of_embarkation=data.get('portOfEmbarkation'),
             port_of_discharge=data.get('portOfDischarge'),
-            line_items=data.get('lineItems')
+            line_items=line_items_final
         )
-        
+
+        # show the invoice in a json format
+        # total_amount=total_final,
+        #     advance_amount=advance_final,
+        #     receivable_amount=receivable_final,
+        #     received_amount=received_final,
+        #     balance_amount=balance_final,
+        print({
+            'total_amount': total_final,
+            'advance_amount': advance_final,
+            'receivable_amount': receivable_final,
+            'received_amount': received_final,
+            'balance_amount': balance_final
+        })
+
         db.session.add(invoice)
         db.session.commit()
-        
-        return jsonify({'success': True, 'message': 'Proforma invoice created successfully', 'id': invoice.id}), 201
+
+        return jsonify({
+            'success': True,
+            'message': 'Proforma invoice created successfully',
+            'id': invoice.id
+        }), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
+
+
 
 @app.route('/api/proforma-invoice/<int:id>/update', methods=['PUT'])
 def update_proforma_invoice(id):
@@ -865,6 +994,61 @@ def update_proforma_invoice(id):
         if not invoice:
             return jsonify({'success': False, 'message': 'Record not found'}), 404
         
+        def _sf(v):
+            try:
+                if v is None:
+                    return 0.0
+                if isinstance(v, (int, float)):
+                    return float(v)
+                s = str(v)
+                cleaned = ''.join(ch for ch in s if (ch.isdigit() or ch in '.-'))
+                return float(cleaned) if cleaned else 0.0
+            except Exception:
+                return 0.0
+
+        currency = (data.get('currency') or invoice.currency or 'INR').strip().upper()
+        divisor = 1.0
+        if currency == 'USD':
+            divisor = 90.0
+        elif currency in ('DINAR', 'DNR', 'KWD'):
+            divisor = 286.0
+
+        total_inr = _sf(data.get('totalAmount'))
+        advance_inr = _sf(data.get('advanceAmount'))
+        received_inr = _sf(data.get('receivedAmount'))
+
+        total_final = round(total_inr / divisor, 2)
+        advance_final = round(advance_inr / divisor, 2)
+        received_final = round(received_inr / divisor, 2)
+
+        receivable_final = round(total_final - advance_final, 2)
+        balance_final = round(receivable_final - received_final, 2)
+
+        line_items_final = []
+        raw_items = data.get('lineItems') or []
+        if isinstance(raw_items, list):
+            for it in raw_items:
+                if not isinstance(it, dict):
+                    continue
+                qty = _sf(it.get('quantity'))
+                unit_inr = _sf(it.get('unitRate'))
+                total_line_inr = _sf(it.get('total'))
+
+                unit_final = round(unit_inr / divisor, 2)
+                if total_line_inr:
+                    total_final_line = round(total_line_inr / divisor, 2)
+                else:
+                    total_final_line = round(qty * unit_final, 2)
+
+                line_items_final.append({
+                    'lineNo': it.get('lineNo'),
+                    'partNumber': it.get('partNumber') or '',
+                    'description': it.get('description') or '',
+                    'quantity': str(it.get('quantity') or ''),
+                    'unitRate': f"{unit_final:.2f}",
+                    'total': f"{total_final_line:.2f}",
+                })
+
         # Update fields
         invoice.invoice_date = data.get('invoiceDate', invoice.invoice_date)
         invoice.invoice_no = data.get('invoiceNo', invoice.invoice_no)
@@ -873,17 +1057,18 @@ def update_proforma_invoice(id):
         invoice.your_reference_no = data.get('yourReferenceNo', invoice.your_reference_no)
         invoice.supplier_address = data.get('supplierAddress', invoice.supplier_address)
         invoice.bill_to_address = data.get('billToAddress', invoice.bill_to_address)
-        invoice.total_amount = data.get('totalAmount', invoice.total_amount)
-        invoice.currency = data.get('currency', invoice.currency)
-        invoice.discount_percentage = data.get('discountPercentage', invoice.discount_percentage)
-        invoice.discount_amount = data.get('discountAmount', invoice.discount_amount)
-        invoice.receivable_amount = data.get('receivableAmount', invoice.receivable_amount)
-        invoice.received_amount = data.get('receivedAmount', invoice.received_amount)
-        invoice.balance_amount = data.get('balanceAmount', invoice.balance_amount)
+
+        invoice.currency = currency
+        invoice.total_amount = total_final
+        invoice.advance_amount = advance_final
+        invoice.receivable_amount = receivable_final
+        invoice.received_amount = received_final
+        invoice.balance_amount = balance_final
+
         invoice.country_of_origin = data.get('countryOfOrigin', invoice.country_of_origin)
         invoice.port_of_embarkation = data.get('portOfEmbarkation', invoice.port_of_embarkation)
         invoice.port_of_discharge = data.get('portOfDischarge', invoice.port_of_discharge)
-        invoice.line_items = data.get('lineItems', invoice.line_items)
+        invoice.line_items = line_items_final
         invoice.updated_at = datetime.now()
         
         db.session.commit()
@@ -1071,8 +1256,7 @@ def get_proforma_invoice(id):
             'billToAddress': item.bill_to_address,
             'totalAmount': item.total_amount,
             'currency': item.currency,
-            'discountPercentage': item.discount_percentage,
-            'discountAmount': item.discount_amount,
+            'advanceAmount': item.advance_amount,
             'receivableAmount': item.receivable_amount,
             'receivedAmount': item.received_amount,
             'balanceAmount': item.balance_amount,
@@ -1156,6 +1340,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         _ensure_packaging_list_schema()
+        _ensure_proforma_invoice_schema()
     
   
 

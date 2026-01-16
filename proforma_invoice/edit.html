@@ -204,6 +204,7 @@
                 <option value="USD" selected>USD ($)</option>
                 <option value="INR">INR (₹)</option>
                 <option value="EUR">EUR (€)</option>
+                <option value="DINAR">DINAR</option>
             </select>
         </div>
     </div>
@@ -277,21 +278,14 @@
             <div class="col-md-4">
                 <label for="totalAmount" class="form-label">Total Amount</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="totalAmount" value="0.00" readonly>
+                    <input type="text" class="form-control" id="totalAmount" value="0.00" >
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
             <div class="col-md-4">
-                <label for="discountPercentage" class="form-label">Discount (%)</label>
+                <label for="advanceAmount" class="form-label">Advance Amount</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" id="discountPercentage" value="0" min="0" max="100" step="0.01">
-                    <span class="input-group-text">%</span>
-                </div>
-            </div>
-             <div class="col-md-4">
-                <label for="discountAmount" class="form-label">Discount Amount</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="discountAmount" value="0.00" readonly>
+                    <input type="text" class="form-control" id="advanceAmount" value="0.00" placeholder="e.g., 500.00">
                     <span class="input-group-text currency-display"></span>
                 </div>
             </div>
@@ -360,7 +354,8 @@
     const currencySymbolMap = {
         USD: '$',
         INR: '₹',
-        EUR: '€'
+        EUR: '€',
+        DINAR: 'KD'
     };
     
     function updateCurrencySymbols() {
@@ -377,8 +372,7 @@
         const updateBtn = document.getElementById('updateBtn');
         const cancelBtn = document.getElementById('cancelBtn');
         const totalAmountInput = document.getElementById('totalAmount');
-        const discountPercentageInput = document.getElementById('discountPercentage');
-        const discountAmountInput = document.getElementById('discountAmount');
+        const advanceAmountInput = document.getElementById('advanceAmount');
         const receivableAmountInput = document.getElementById('receivableAmount');
         const receivedAmountInput = document.getElementById('receivedAmount');
         const balanceAmountInput = document.getElementById('balanceAmount');
@@ -438,19 +432,15 @@
             // 1. Total Amount
             totalAmountInput.value = grandTotal.toFixed(2);
 
-            // 2. Discount Amount
-            const discountPercent = parseFloat(discountPercentageInput.value) || 0;
-            const discountAmount = grandTotal * (discountPercent / 100);
-            discountAmountInput.value = discountAmount.toFixed(2);
-
-            // 3. Keep Received Amount Details as user-entered (do not overwrite)
+            // 2. Keep Received Amount Details as user-entered (do not overwrite)
             if (receivableAmountInput && receivableAmountInput.value === undefined) {
                 receivableAmountInput.value = '';
             }
 
-            // 4. Balance Amount (Total - Discount - Received)
+            // 3. Balance Amount (Total - Advance - Received)
             const receivedAmount = parseFloat(receivedAmountInput.value) || 0;
-            const balance = Math.max(0, (grandTotal - discountAmount - receivedAmount));
+            const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
+            const balance = Math.max(0, (grandTotal - advanceAmount - receivedAmount));
             balanceAmountInput.value = balance.toFixed(2);
         };
 
@@ -507,10 +497,16 @@
             }
         });
 
-        // Event listeners for calculating on input changes in the table and discount fields
+        // Event listeners for calculating on input changes in the table and related fields
         lineItemsBody.addEventListener('input', handleInputChange);
-        discountPercentageInput.addEventListener('input', updateSummary);
+        advanceAmountInput.addEventListener('input', updateSummary);
         receivedAmountInput.addEventListener('input', updateSummary);
+
+        // Make advance amount accept only numbers and one decimal point
+        advanceAmountInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9.]/g, '')
+                .replace(/\B\.(?=.*\.)/, '');
+        });
 
         // Make received amount accept only numbers and one decimal point
         receivedAmountInput.addEventListener('input', (e) => {
@@ -532,7 +528,7 @@
                     document.getElementById('supplierAddress').value = data.supplierAddress || '';
                     document.getElementById('billToAddress').value = data.billToAddress || '';
                     document.getElementById('currencySelect').value = data.currency || 'USD';
-                    document.getElementById('discountPercentage').value = data.discountPercentage || '0';
+                    document.getElementById('advanceAmount').value = data.advanceAmount || '0.00';
                     document.getElementById('receivableAmount').value = (data.receivableAmount ?? data.receivedDetails ?? data.received_details ?? '');
                     document.getElementById('receivedAmount').value = data.receivedAmount || '';
                     document.getElementById('countryOfOrigin').value = data.countryOfOrigin || '';
@@ -575,8 +571,7 @@
                 lineItems: [],
                 totalAmount: document.getElementById('totalAmount').value,
                 currency: document.getElementById('currencySelect').value,
-                discountPercentage: document.getElementById('discountPercentage').value,
-                discountAmount: document.getElementById('discountAmount').value,
+                advanceAmount: document.getElementById('advanceAmount').value,
                 receivableAmount: document.getElementById('receivableAmount').value,
                 receivedAmount: document.getElementById('receivedAmount').value,
                 balanceAmount: document.getElementById('balanceAmount').value,
@@ -588,13 +583,14 @@
             // Collect all line items
             const rows = lineItemsBody.querySelectorAll('.line-item-row');
             rows.forEach((row, index) => {
+                const amountSpan = row.querySelector('.total .amount-num');
                 const lineItem = {
                     lineNo: index + 1,
                     partNumber: row.querySelector('.part-number').value,
                     description: row.querySelector('.description').value,
                     quantity: row.querySelector('.quantity').value,
                     unitRate: row.querySelector('.unit-rate').value,
-                    total: row.querySelector('.total').textContent
+                    total: amountSpan ? amountSpan.textContent : row.querySelector('.total').textContent
                 };
                 formData.lineItems.push(lineItem);
             });
